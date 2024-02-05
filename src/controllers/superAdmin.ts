@@ -33,7 +33,7 @@ console.log(validUser);
         const token = jwt.sign({ id: validUser._id.toString() }, process.env.JWT_SECRET || '', { expiresIn: '1h' });
 
         const expiry: Date = new Date(Date.now() + 3600000)
-        res.cookie('access_token', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({user:validUser,token});
+        res.cookie('access_token', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({user:validUser,token, success: true, message:'user validated'});
        
 
 
