@@ -7,6 +7,7 @@ import retailerAdmin from './routes/retailerAdmin'
 import cookieParser from 'cookie-parser';
 import { Server } from 'socket.io';
 import cors from 'cors'
+import session from 'express-session'
 import errorHandlerMiddleware from './middleware/errohandlerMiddleware';
 
 dotenv.config()
@@ -26,6 +27,13 @@ app.use(cors({
 //     res.send('welcome to home');
 // });
 
+app.use(
+    session({
+      secret: 'your-secret-key', // Change this to a strong and unique secret
+      resave: false,
+      saveUninitialized: true,
+    })
+  );
 app.use(errorHandlerMiddleware);
 // Example CORS middleware in Express
 // app.use((req, res, next) => {
