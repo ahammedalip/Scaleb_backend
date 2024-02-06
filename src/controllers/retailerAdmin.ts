@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer'
 
 
 
-export const retailerSignUp = async (req: Request, res: Response, next: NextFunction) => {
+export const retailValidation = async (req: Request, res: Response, next: NextFunction) => {
     const { retailerName, email, password, } = req.body
     console.log(req.body);
     try {
@@ -30,13 +30,16 @@ export const retailerSignUp = async (req: Request, res: Response, next: NextFunc
         const generatedOTP: number = Math.floor(100000 + Math.random() * 900000);
         console.log('generated OTP is ', generatedOTP);
         req.session.generatedOTP = generatedOTP;
+        req.session.save()
+        console.log('generated OTP from session is ', req.session.generatedOTP);
+
         const mailOptions = {
             from: 'ahmd.work12@gmail.com',
             to: req.body.email, // User's email
             subject: 'OTP Verification',
             text: `Your OTP for verification of Scale.b is  : ${generatedOTP}. 
-     Do not share the OTP with anyone.
-     For further details and complaints visit info.goshoppy.com`
+            Do not share the OTP with anyone.
+            For further details and complaints visit www.scale.b.online`
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -47,16 +50,7 @@ export const retailerSignUp = async (req: Request, res: Response, next: NextFunc
                 console.log('Email sent: ' + info.response);
                 res.status(250).json({ success: true, message: 'OTP send succesfully' })
             }
-        });
-        
-        // const hashedPass = bcryptjs.hashSync(password,2)
-        // const newRetailer = new retailerAdmin({
-        //     retailerName,
-        //     email,
-        //     password: hashedPass
-        // })
-        // const newUser = await newRetailer.save()
-        // res.status(201).json({ success: true, message: 'User created successfully' })
+        });       
     } catch (err) {
         console.log('error at retailer signup', err)
         if (err.code === 11000) {
@@ -64,7 +58,30 @@ export const retailerSignUp = async (req: Request, res: Response, next: NextFunc
             // console.log(err.keyValue);
             res.status(409).json({ success: false, message: `${keyValue} already exists` })
         }
-
     }
+}
+
+export const otpVerification = async (req: Request, res: Response) => {
+    const { formData, otp } = req.body;
+    console.log('otp from req.body', otp);
+    console.log('otp from session', req.session.generatedOTP);
+    const { retailerName, email, password } = formData;
+    const isValidOTP = req.session.generatedOTP === otp
+    console.log(isValidOTP);
+        try {
+            if(isValidOTP){
+                const hashedPass = bcryptjs.hashSync(password, 2)
+            const newRetailer = new retailerAdmin({
+                retailerName,
+                email,
+                password : hashedPass
+
+            })
+            await newRetailer.save()
+            console.log('saved');
+            }
+        } catch (error) {
+
+        }
 
 }
