@@ -18,8 +18,8 @@ const mongoURL: string = process.env.MONGO!
 app.use(express.json());
 app.use(cookieParser())
 app.use(cors({
-    origin: '*', 
-    credentials: true
+    origin: 'http://localhost:5173', 
+    credentials: false
 }))
 // const io = new Server(server); 
 
@@ -29,18 +29,18 @@ app.use(cors({
 
 app.use(
     session({
-      secret: 'your-secret-key', // Change this to a strong and unique secret
+      secret: 'your-secret-key',
       resave: false,
       saveUninitialized: true,
     })
   );
 app.use(errorHandlerMiddleware);
 // Example CORS middleware in Express
-// app.use((req, res, next) => {
-//     res.header('Access-Control-Allow-Origin', 'http://localhost:5173'); // Replace with your frontend URL
-//     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-//     next();
-//   });
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:5173'); // Replace with your frontend URL
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+  });
   
 
 

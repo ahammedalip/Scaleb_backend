@@ -6,18 +6,20 @@ interface UserInterface extends Document{
     password: string,
     isBlocked: boolean,
     role: string,
+    otpCode: number,
+    isVerified: boolean,
 }
 
 const userSchema = new Schema<UserInterface>({
     retailerName: {
         type:String,
         required: true,
-        unique: true
+        // unique: true
     },
     email: {
         type: String,
         required : true,
-        unique: true
+        // unique: true
     },
     password:{
         type:String,
@@ -30,6 +32,13 @@ const userSchema = new Schema<UserInterface>({
     role:{
         type: String,
         default: 'retailer'
+    },
+    otpCode:{
+        type: Number,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
     }
 })
 

@@ -18,7 +18,19 @@ export const retailValidation = async (req: Request, res: Response, next: NextFu
         if (existingEmail) {
             res.status(400).json({ success: false, message: 'Email already exists' })
         }
+        const generatedOTP: number = Math.floor(100000 + Math.random() * 900000);
 
+        const hashedPass: string = bcryptjs.hashSync(password, 2);
+        const newRetailer = new retailerAdmin({
+            retailerName,
+            email,
+            password: hashedPass,
+            otpCode: generatedOTP
+        })
+
+        await newRetailer.save()
+
+        console.log('generated OTP is ', generatedOTP);
         const transporter = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
@@ -27,11 +39,6 @@ export const retailValidation = async (req: Request, res: Response, next: NextFu
             }
         })
 
-        const generatedOTP: number = Math.floor(100000 + Math.random() * 900000);
-        console.log('generated OTP is ', generatedOTP);
-        req.session.generatedOTP = generatedOTP;
-        req.session.save()
-        console.log('generated OTP from session is ', req.session.generatedOTP);
 
         const mailOptions = {
             from: 'ahmd.work12@gmail.com',
@@ -50,8 +57,8 @@ export const retailValidation = async (req: Request, res: Response, next: NextFu
                 console.log('Email sent: ' + info.response);
                 res.status(250).json({ success: true, message: 'OTP send succesfully' })
             }
-        });       
-    } catch (err) {
+        });
+    } catch (err: any) {
         console.log('error at retailer signup', err)
         if (err.code === 11000) {
             const keyValue = err.keyValue
@@ -63,25 +70,26 @@ export const retailValidation = async (req: Request, res: Response, next: NextFu
 
 export const otpVerification = async (req: Request, res: Response) => {
     const { formData, otp } = req.body;
-    console.log('otp from req.body', otp);
-    console.log('otp from session', req.session.generatedOTP);
     const { retailerName, email, password } = formData;
-    const isValidOTP = req.session.generatedOTP === otp
-    console.log(isValidOTP);
-        try {
-            if(isValidOTP){
-                const hashedPass = bcryptjs.hashSync(password, 2)
-            const newRetailer = new retailerAdmin({
-                retailerName,
-                email,
-                password : hashedPass
 
-            })
-            await newRetailer.save()
-            console.log('saved');
-            }
-        } catch (error) {
-
+    try {
+        const verifyEmail = await retailerAdmin.findOne({ email: email });
+console.log('code from mongo',verifyEmail?.otpCode);
+console.log('code from frontend',otp);
+        const verifyOTP = verifyEmail?.otpCode == otp
+        console.log('verify email',verifyEmail, 'verify otp', verifyOTP);
+        if (!verifyOTP || !verifyEmail) {
+            res.status(401).json({ success: false, message: 'OTP entered is incorrect. Please try again.' })
         }
+        if (verifyOTP) {
+            retailerAdmin.updateOne(
+                { email }, { $set: { isVerified: true } }
+            )
+            return res.status(200).json({ success: true, message: 'OTP verified successfully.' });
+        }
+    } catch (error) {
+        console.error("Error at otp verification",error);
+        return res.status(500).json({ success: false, message: 'An internal server error occurred.' });
+    }
 
 }
