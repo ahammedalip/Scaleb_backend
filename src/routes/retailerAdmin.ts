@@ -1,11 +1,12 @@
 import express from 'express'
-import { otpVerification, retailValidation } from '../controllers/retailerAdminAuth';
+import { otpVerification, retailLogin, retailValidation } from '../controllers/retailerAdminAuth';
 
 
 const router = express.Router()
 
-router.post('/signup/verify_cred',retailValidation)
-router.post ('/signup/verify_otp', otpVerification)
+router.post('/verify_cred',retailValidation)
+router.post ('/verify_otp', otpVerification)
+router.post ('/login', retailLogin)
 
 export default router;
 

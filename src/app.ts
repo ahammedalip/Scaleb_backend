@@ -3,7 +3,7 @@ import http from 'http';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv'
 import superAdmin from './routes/superAdmin';
-import retailerAdmin from './routes/retailerAdmin'
+import retailerAdminAuth from './routes/retailerAdmin'
 import cookieParser from 'cookie-parser';
 import { Server } from 'socket.io';
 import cors from 'cors'
@@ -65,6 +65,7 @@ server.listen(3000, () => {
 
 
 app.use('/admin', superAdmin)
-app.use('/retailer',retailerAdmin)
+app.use('/retailer/auth',retailerAdminAuth)
+// app.use()
 
 

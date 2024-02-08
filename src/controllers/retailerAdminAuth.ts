@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express"
 import session from 'express-session'
-import retailerAdmin from "../models/retailerAdmin";
+import retailerAdmin from "../models/retailerAdminAuth";
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer'
+import jwt, { JsonWebTokenError } from "jsonwebtoken";
 
 
 
@@ -74,10 +75,10 @@ export const otpVerification = async (req: Request, res: Response) => {
 
     try {
         const verifyEmail = await retailerAdmin.findOne({ email: email });
-console.log('code from mongo',verifyEmail?.otpCode);
-console.log('code from frontend',otp);
+        console.log('code from mongo', verifyEmail?.otpCode);
+        console.log('code from frontend', otp);
         const verifyOTP = verifyEmail?.otpCode == otp
-        console.log('verify email',verifyEmail, 'verify otp', verifyOTP);
+        console.log('verify email', verifyEmail, 'verify otp', verifyOTP);
         if (!verifyOTP || !verifyEmail) {
             res.status(401).json({ success: false, message: 'OTP entered is incorrect. Please try again.' })
         }
@@ -88,8 +89,31 @@ console.log('code from frontend',otp);
             return res.status(200).json({ success: true, message: 'OTP verified successfully.' });
         }
     } catch (error) {
-        console.error("Error at otp verification",error);
+        console.error("Error at otp verification", error);
         return res.status(500).json({ success: false, message: 'An internal server error occurred.' });
     }
 
+}
+
+export const retailLogin = async (req: Request, res: Response) => {
+    const { retailerName, password } = req.body
+
+    console.log(retailerName, password);
+
+    
+    try {
+        const validUser = await retailerAdmin.findOne({ retailerName });
+        if (!validUser) {
+            res.status(401).json({ success: false, message: 'Enter valid credentials' })
+        }
+        if (validUser?.password !== password) {
+            res.status(401).json({ success: false, message: 'Password is wrong' })
+        }
+        const token = jwt.sign({ id: validUser?._id.toString(), role: 'retailerAdmin' }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
+        const expiry:Date = new Date(Date.now()+3600000)
+        res.cookie('access_token', token, {httpOnly: true,expires: expiry, secure:false}).status(200).json({user: validUser, token, success: true, message: 'User validated'});
+    } catch (error) {
+        console.log('Error at superAdmin signup', error);
+        res.status(500).json({success: false, message:'Internal server Error'})
+    }
 }
