@@ -100,20 +100,24 @@ export const retailLogin = async (req: Request, res: Response) => {
 
     console.log(retailerName, password);
 
-    
+
     try {
         const validUser = await retailerAdmin.findOne({ retailerName });
+        const hashedPass = bcryptjs.compareSync(password, validUser?.password)
+        // console.log('hashed pass out', hashedPass);
         if (!validUser) {
             res.status(401).json({ success: false, message: 'Enter valid credentials' })
         }
-        if (validUser?.password !== password) {
+        if (!hashedPass) {
             res.status(401).json({ success: false, message: 'Password is wrong' })
         }
+
+        validUser.password = "";
         const token = jwt.sign({ id: validUser?._id.toString(), role: 'retailerAdmin' }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
         const expiry:Date = new Date(Date.now()+3600000)
-        res.cookie('access_token', token, {httpOnly: true,expires: expiry, secure:false}).status(200).json({user: validUser, token, success: true, message: 'User validated'});
+        res.cookie('access_token1', token, {httpOnly: true,expires: expiry, secure:false}).status(200).json({user: validUser, token, success: true, message: 'User validated'});
     } catch (error) {
-        console.log('Error at superAdmin signup', error);
+        console.log('Error at retailAdmin signup', error);
         res.status(500).json({success: false, message:'Internal server Error'})
     }
 }
