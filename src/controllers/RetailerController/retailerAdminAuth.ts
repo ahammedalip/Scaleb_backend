@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import session from 'express-session'
-import retailerAdmin from "../models/retailerAdminAuth";
+import retailerAdmin from "../../models/retailerAdmin";
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer'
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
@@ -68,17 +68,17 @@ export const retailValidation = async (req: Request, res: Response, next: NextFu
         }
     }
 }
-
+ 
 export const otpVerification = async (req: Request, res: Response) => {
     const { formData, otp } = req.body;
     const { retailerName, email, password } = formData;
 
     try {
         const verifyEmail = await retailerAdmin.findOne({ email: email });
-        console.log('code from mongo', verifyEmail?.otpCode);
-        console.log('code from frontend', otp);
+        // console.log('code from mongo', verifyEmail?.otpCode);
+        // console.log('code from frontend', otp);
         const verifyOTP = verifyEmail?.otpCode == otp
-        console.log('verify email', verifyEmail, 'verify otp', verifyOTP);
+        // console.log('verify email', verifyEmail, 'verify otp', verifyOTP);
         if (!verifyOTP || !verifyEmail) {
             res.status(401).json({ success: false, message: 'OTP entered is incorrect. Please try again.' })
         }
@@ -117,7 +117,7 @@ export const retailLogin = async (req: Request, res: Response) => {
         const expiry:Date = new Date(Date.now()+3600000)
         res.cookie('access_token1', token, {httpOnly: true,expires: expiry, secure:false}).status(200).json({user: validUser, token, success: true, message: 'User validated'});
     } catch (error) {
-        console.log('Error at retailAdmin signup', error);
+        console.log('Error at retailAdmin login', error);
         res.status(500).json({success: false, message:'Internal server Error'})
     }
 }
