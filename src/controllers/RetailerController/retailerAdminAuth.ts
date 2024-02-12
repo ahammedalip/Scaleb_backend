@@ -68,17 +68,14 @@ export const retailValidation = async (req: Request, res: Response, next: NextFu
         }
     }
 }
- 
+
 export const otpVerification = async (req: Request, res: Response) => {
     const { formData, otp } = req.body;
     const { retailerName, email, password } = formData;
 
     try {
         const verifyEmail = await retailerAdmin.findOne({ email: email });
-        // console.log('code from mongo', verifyEmail?.otpCode);
-        // console.log('code from frontend', otp);
         const verifyOTP = verifyEmail?.otpCode == otp
-        // console.log('verify email', verifyEmail, 'verify otp', verifyOTP);
         if (!verifyOTP || !verifyEmail) {
             res.status(401).json({ success: false, message: 'OTP entered is incorrect. Please try again.' })
         }
@@ -92,7 +89,6 @@ export const otpVerification = async (req: Request, res: Response) => {
         console.error("Error at otp verification", error);
         return res.status(500).json({ success: false, message: 'An internal server error occurred.' });
     }
-
 }
 
 export const retailLogin = async (req: Request, res: Response) => {
@@ -100,24 +96,29 @@ export const retailLogin = async (req: Request, res: Response) => {
 
     console.log(retailerName, password);
 
-
     try {
         const validUser = await retailerAdmin.findOne({ retailerName });
-        const hashedPass = bcryptjs.compareSync(password, validUser?.password)
-        // console.log('hashed pass out', hashedPass);
         if (!validUser) {
-            res.status(401).json({ success: false, message: 'Enter valid credentials' })
+            return res.status(401).json({ success: false, message: 'Enter valid credentials' })
         }
+        const hashedPass = bcryptjs.compareSync(password, validUser?.password)
+
         if (!hashedPass) {
-            res.status(401).json({ success: false, message: 'Password is wrong' })
+            return res.status(401).json({ success: false, message: 'Password is wrong' })
+        }
+        if(validUser.isBlocked ){
+            return res.status(403).json({success: false, message: 'User is Blocked'})
+        }
+        if(!validUser.isVerified){
+            return res.status(403).json({success:false, message: 'Please Signup again'})
         }
 
         validUser.password = "";
-        const token = jwt.sign({ id: validUser?._id.toString(), role: 'retailerAdmin' }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
-        const expiry:Date = new Date(Date.now()+3600000)
-        res.cookie('access_token1', token, {httpOnly: true,expires: expiry, secure:false}).status(200).json({user: validUser, token, success: true, message: 'User validated'});
+        const token = jwt.sign({ id: validUser?._id.toString(), role: 'retailerAdmin', validUser: validUser }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
+        const expiry: Date = new Date(Date.now() + 3600000)
+        res.cookie('access_token1', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
     } catch (error) {
         console.log('Error at retailAdmin login', error);
-        res.status(500).json({success: false, message:'Internal server Error'})
+        return res.status(500).json({ success: false, message: 'Internal server Error' })
     }
 }

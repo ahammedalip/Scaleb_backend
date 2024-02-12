@@ -10,6 +10,7 @@ import { Server } from 'socket.io';
 import cors from 'cors'
 import session from 'express-session'
 import errorHandlerMiddleware from './middleware/errohandlerMiddleware';
+import retailerAdmin from './routes/RetailerRoutes/retailerAdmin'
 
 dotenv.config()
 const app: Express = express();
@@ -64,10 +65,8 @@ server.listen(3000, () => {
     console.log('http://localhost:3000/');
 });
 
-
 app.use('/admin', superAdmin)
 app.use('/retailer/auth',retailerAdminAuth)
+app.use('/retailer',retailerAdmin)
 app.use('/production/auth', productionAdminAuth )
 // app.use()
-
-
