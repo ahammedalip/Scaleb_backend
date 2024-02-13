@@ -42,3 +42,13 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         res.status(error.StatusCode).json({ success: false, message: error.message });
     }
 }
+
+
+export const actions = async(req: Request, res: Response)=>{
+    const {id} = req.params._id
+    try {
+        
+    } catch (error) {
+        
+    }
+}

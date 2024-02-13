@@ -6,6 +6,7 @@ const router = express.Router()
 
 
 router.post('/Admin-auth', login)
+router.post('/home', actions)
 
 
 
