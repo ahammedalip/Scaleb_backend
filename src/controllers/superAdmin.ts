@@ -12,12 +12,9 @@ interface SuperAdmin {
 export const login = async (req: Request, res: Response, next: NextFunction) => {
     const { username, password: reqPassword } = req.body;
 
-
     try {
         const validUser = await superAdmin.findOne({ username })
         console.log('user found', validUser)
-
-
         if (!validUser) {
             // If user is not found, call the error handler and pass the error to next
             const error = errorhandler(401, "User not found");
@@ -33,7 +30,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         const token = jwt.sign({ id: validUser._id.toString(), role: 'SuperAdmin' }, process.env.JWT_SECRET || '', { expiresIn: '1h' });
 
         const expiry: Date = new Date(Date.now() + 3600000)
-        res.cookie('access_token', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'user validated' });
+        res.cookie('access_token', token, { expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'user validated' });
     }
     catch (err) {
         console.log('Error at superAdmin signup', err);
@@ -45,7 +42,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 
 export const actions = async(req: Request, res: Response)=>{
-    const {id} = req.params._id
+    // const {id} = req.params._id
     try {
         
     } catch (error) {
