@@ -82,7 +82,7 @@ export const getSalesList = async (req: Request, res: Response)=>{
     try {
         const validAdmin = await retailerAdmin.findById(id)
         if(!validAdmin){
-            return res.status(403).json({success: true, message: "Please login"})
+            return res.status(403).json({success: false, message: "Please login"})
         }
         const salesExeclist = await retailerSales.find({retailerAdminId:id})
 

@@ -1,7 +1,8 @@
-import superAdmin from "../models/superAdmin";
+import superAdmin from "../../models/superAdmin";
 import { NextFunction, Request, Response } from 'express';
-import { errorhandler } from "../utils/errorhandler";
+import { errorhandler } from "../../utils/errorhandler";
 import jwt from 'jsonwebtoken'
+import retailerAdmin from "../../models/retailerAdmin";
 
 interface SuperAdmin {
     username: string;
@@ -41,10 +42,20 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 }
 
 
-export const actions = async(req: Request, res: Response)=>{
-    // const {id} = req.params._id
+export const getRetailerList = async(req: Request, res: Response)=>{
+    const id= req.query.id
+    console.log(id);
+
     try {
-        
+        const verifyAdmin = await superAdmin.findById(id)
+        if(!verifyAdmin){
+             return res.status(403).json({success: false, message: 'please login and try again'})
+        }
+
+        const retailersList = await retailerAdmin.find()
+        console.log('list',retailersList);
+
+        res.status(200).json({success: true, message: 'Retailer list fetched successfully', userlist:retailersList})
     } catch (error) {
         
     }
