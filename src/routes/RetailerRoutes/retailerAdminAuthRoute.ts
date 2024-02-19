@@ -1,5 +1,5 @@
 import express from 'express'
-import { otpVerification, retailLogin, retailValidation } from '../../controllers/RetailerController/retailerAdminAuth';
+import { otpVerification, retailLogin, retailValidation } from '../../controllers/RetailerController/retailerAuth';
 
 
 const router = express.Router()

@@ -4,6 +4,7 @@ import retailerAdmin from "../../models/retailerAdmin";
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer'
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
+import retailerSales from "../../models/RetailerSales";
 
 
 
@@ -92,33 +93,59 @@ export const otpVerification = async (req: Request, res: Response) => {
 }
 
 export const retailLogin = async (req: Request, res: Response) => {
-    const { retailerName, password } = req.body
+    const { retailerName, password, role } = req.body
+    console.log(req.body);
 
-    console.log(retailerName, password);
 
-    try {
-        const validUser = await retailerAdmin.findOne({ retailerName });
-        if (!validUser) {
-            return res.status(401).json({ success: false, message: 'Enter valid credentials' })
-        }
-        const hashedPass = bcryptjs.compareSync(password, validUser?.password)
+    if (role == 'retailAdmin') {
+        try {
+            const validUser = await retailerAdmin.findOne({ retailerName });
+            if (!validUser) {
+                return res.status(401).json({ success: false, message: 'Enter valid credentials' })
+            }
+            const hashedPass = bcryptjs.compareSync(password, validUser?.password)
 
-        if (!hashedPass) {
-            return res.status(401).json({ success: false, message: 'Password is wrong' })
-        }
-        if(validUser.isBlocked ){
-            return res.status(403).json({success: false, message: 'User is Blocked'})
-        }
-        if(!validUser.isVerified){
-            return res.status(403).json({success:false, message: 'Please Signup again'})
-        }
+            if (!hashedPass) {
+                return res.status(401).json({ success: false, message: 'Password is wrong' })
+            }
+            if (validUser.isBlocked) {
+                return res.status(403).json({ success: false, message: 'User is Blocked' })
+            }
+            if (!validUser.isVerified) {
+                return res.status(403).json({ success: false, message: 'Please Signup again' })
+            }
 
-        validUser.password = "";
-        const token = jwt.sign({ id: validUser?._id.toString(), role: 'retailerAdmin', validUser: validUser.retailerName }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
-        const expiry: Date = new Date(Date.now() + 3600000)
-        res.cookie('access_token1', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
-    } catch (error) {
-        console.log('Error at retailAdmin login', error);
-        return res.status(500).json({ success: false, message: 'Internal server Error' })
+            validUser.password = "";
+            const token = jwt.sign({ id: validUser?._id.toString(), role: 'retailerAdmin', validUser: validUser.retailerName }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
+            const expiry: Date = new Date(Date.now() + 3600000)
+            res.cookie('access_token1', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
+        } catch (error) {
+            console.log('Error at retailAdmin login', error);
+            return res.status(500).json({ success: false, message: 'Internal server Error' })
+        }
+    } else if (role == 'salesExecutive') {
+        try {
+            const validUser = await retailerSales.findOne({ username: retailerName })
+            // console.log('alid user', validUser);
+            if (!validUser) {
+                return res.status(401).json({ success: false, message: 'Enter valid credentials' })
+            }
+            const hashedPass = bcryptjs.compareSync(password, validUser.password)
+
+            if (!hashedPass) {
+                return res.status(401).json({ success: false, message: 'Password is wrong' })
+            }
+            if (validUser.isBlocked) {
+                return res.status(403).json({ success: false, message: 'User is Blocked' })
+            }
+            validUser.password = "";
+            const token = jwt.sign({ id: validUser?._id.toString(), role: 'retailerSales', validUser: validUser.username }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
+            const expiry: Date = new Date(Date.now() + 3600000)
+            res.cookie('access_token11', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
+
+        } catch (error) {
+            console.log('Error at retailAdmin login', error);
+            return res.status(500).json({ success: false, message: 'Internal server Error' })
+        }
     }
 }
