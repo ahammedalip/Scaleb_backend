@@ -52,7 +52,7 @@ export const getRetailerList = async(req: Request, res: Response)=>{
              return res.status(403).json({success: false, message: 'please login and try again'})
         }
 
-        const retailersList = await retailerAdmin.find()
+        const retailersList = await retailerAdmin.find({isVerified: true})
         console.log('list',retailersList);
 
         res.status(200).json({success: true, message: 'Retailer list fetched successfully', userlist:retailersList})
