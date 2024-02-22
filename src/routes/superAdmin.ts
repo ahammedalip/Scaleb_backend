@@ -1,5 +1,5 @@
 import express from 'express'
-import {actions, getProductionList, getRetailerList, login} from '../controllers/SuperAdmin/superAdmin'
+import {getProductionList, getRetailerList, login} from '../controllers/SuperAdmin/superAdmin'
 
 
 const router = express.Router()
