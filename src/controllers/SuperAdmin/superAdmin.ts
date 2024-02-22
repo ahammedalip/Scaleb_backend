@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { errorhandler } from "../../utils/errorhandler";
 import jwt from 'jsonwebtoken'
 import retailerAdmin from "../../models/retailerAdmin";
+import productionAdmin from "../../models/ProductionAdmin";
 
 interface SuperAdmin {
     username: string;
@@ -57,6 +58,26 @@ export const getRetailerList = async(req: Request, res: Response)=>{
 
         res.status(200).json({success: true, message: 'Retailer list fetched successfully', userlist:retailersList})
     } catch (error) {
-        
+        console.log('error at fetching retailer list', error);
+        res.status(500).json({success:false, message: 'Error at fetching retailer list'})
     }
+}
+
+export const getProductionList = async(req:Request, res: Response)=>{
+    const id= req.query.id
+    console.log(id);
+
+    try {
+        const verifyAdmin = await superAdmin.findById(id)
+        if(!verifyAdmin){
+            return res.status(403).json({success: false, message: "Please login and try again"})
+
+        }
+        const productionList = await productionAdmin.find({isVerified: true})
+        console.log('list ', productionList);
+    } catch (error) {
+        console.log('Error at fetching production list=>',error );
+        res.status(500).json({success:false, message:'Error at fetching production list'})
+    }
+
 }

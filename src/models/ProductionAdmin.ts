@@ -35,7 +35,11 @@ const userSchema = new Schema<UserInterface>({
     isVerified:{
         type:Boolean,
         default:false
-    }
+    },
+    isBlocked:{
+        type: Boolean,
+        default: false
+    },
 })
 
 const productionAdmin = model<UserInterface>('ProductionAdmin', userSchema)
