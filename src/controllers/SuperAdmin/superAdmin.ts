@@ -71,10 +71,9 @@ export const getProductionList = async(req:Request, res: Response)=>{
         const verifyAdmin = await superAdmin.findById(id)
         if(!verifyAdmin){
             return res.status(403).json({success: false, message: "Please login and try again"})
-
         }
         const productionList = await productionAdmin.find({isVerified: true})
-        console.log('list ', productionList);
+        res.status(200).json({success: true, message:'Production list fetched successfully', userlist:productionList})
     } catch (error) {
         console.log('Error at fetching production list=>',error );
         res.status(500).json({success:false, message:'Error at fetching production list'})
