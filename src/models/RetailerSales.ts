@@ -6,6 +6,7 @@ interface UserInterface{
     password: string,
     retailerAdminId: string,
     isBlocked: boolean,
+    role: string
 }
 
 const userSchema = new Schema<UserInterface>({
@@ -28,6 +29,10 @@ const userSchema = new Schema<UserInterface>({
     isBlocked:{
         type:Boolean,
         default:false
+    },
+    role:{
+        type:String,
+        default: 'retailer_sales'
     }
 })
 
