@@ -45,7 +45,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 export const getRetailerList = async(req: Request, res: Response)=>{
     const id= req.query.id
-    console.log(id);
 
     try {
         const verifyAdmin = await superAdmin.findById(id)
@@ -78,5 +77,9 @@ export const getProductionList = async(req:Request, res: Response)=>{
         console.log('Error at fetching production list=>',error );
         res.status(500).json({success:false, message:'Error at fetching production list'})
     }
+}
 
+export const blockUser = async (req:Request, res: Response)=>{
+    console.log('coming here');
+    
 }

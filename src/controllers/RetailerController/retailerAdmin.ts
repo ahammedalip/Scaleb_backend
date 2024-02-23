@@ -13,7 +13,6 @@ export const addSalesExecutive = async (req: Request, res: Response) => {
     const { username, password, email } = data
 
     try {
-        console.log('hi');
         const validAdmin = await retailerAdmin.findById(id)
         if (validAdmin?.isBlocked || !validAdmin?.isVerified) {
             return res.status(403).json({ success: false, message: 'Please login again' })
