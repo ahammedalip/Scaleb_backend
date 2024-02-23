@@ -108,7 +108,7 @@ export const login = async (req: Request, res: Response) => {
 
         const token = jwt.sign({ id: validUser?._id.toString(), role: 'productionAdmin' }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
         const expiry: Date = new Date(Date.now() + 3600000)
-        res.cookie('access_token2', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
+        res.cookie('production_token', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
 
     } catch (error) {
         console.log('Error at productionAdmin login', error);

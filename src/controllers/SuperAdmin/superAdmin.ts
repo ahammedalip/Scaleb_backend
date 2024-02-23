@@ -32,7 +32,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         const token = jwt.sign({ id: validUser._id.toString(), role: 'SuperAdmin' }, process.env.JWT_SECRET || '', { expiresIn: '1h' });
 
         const expiry: Date = new Date(Date.now() + 3600000)
-        res.cookie('access_token', token, { expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'user validated' });
+        res.cookie('admin_token', token, { expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'user validated' });
     }
     catch (err) {
         console.log('Error at superAdmin signup', err);

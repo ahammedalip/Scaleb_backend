@@ -118,7 +118,7 @@ export const retailLogin = async (req: Request, res: Response) => {
             validUser.password = "";
             const token = jwt.sign({ id: validUser?._id.toString(), role: 'retailerAdmin', validUser: validUser.retailerName }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
             const expiry: Date = new Date(Date.now() + 3600000)
-            res.cookie('access_token1', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
+            res.cookie('retailer_token', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
         } catch (error) {
             console.log('Error at retailAdmin login', error);
             return res.status(500).json({ success: false, message: 'Internal server Error' })
@@ -141,7 +141,7 @@ export const retailLogin = async (req: Request, res: Response) => {
             validUser.password = "";
             const token = jwt.sign({ id: validUser?._id.toString(), role: 'retailerSales', validUser: validUser.username }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
             const expiry: Date = new Date(Date.now() + 3600000)
-            res.cookie('access_token11', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
+            res.cookie('retailerSales_token', token, { httpOnly: true, expires: expiry, secure: false }).status(200).json({ user: validUser, token, success: true, message: 'User validated' });
 
         } catch (error) {
             console.log('Error at retailAdmin login', error);
