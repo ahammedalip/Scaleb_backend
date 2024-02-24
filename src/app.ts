@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import { Server } from 'socket.io';
 import cors from 'cors'
 import session from 'express-session'
+import morgan from 'morgan';
 import errorHandlerMiddleware from './middleware/errohandlerMiddleware';
 import retailerAdmin from './routes/RetailerRoutes/retailerAdmin'
 
@@ -19,6 +20,7 @@ const mongoURL: string = process.env.MONGO!
 
 app.use(express.json());
 app.use(cookieParser())
+app.use(morgan('tiny'));
 app.use(cors({
     origin: 'http://localhost:5173', 
     credentials: true
