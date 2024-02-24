@@ -95,3 +95,33 @@ export const getSalesList = async (req: Request, res: Response)=>{
         res.status(400).json({success:false, message: "Error while fetching data"})
     }
 }
+
+export const blockSalesExec = async (req:Request, res: Response)=>{
+  
+    const id = req.query.id
+    console.log('id from query is ', id);
+
+    try {
+        const validUser = await retailerSales.findById(id)
+        if(!validUser){
+            return res.status(404).json({success:false, message:'User not found'});
+        }
+        const isBlocked = validUser.isBlocked;
+        const updateStatus = await retailerSales.updateOne(
+            {_id:id},
+            {$set:{isBlocked:!isBlocked}}
+        )
+
+        if(!updateStatus){
+            return res.status(500).json({ success: false, message: 'Error while blocking' })
+        }
+        if(updateStatus){
+            console.log('updated',updateStatus);
+        }
+        const salesExeclist = await retailerSales.find()
+        return res.status(200).json({ success: true, message: 'User blocked/unblocked successfully', userlist:salesExeclist})
+
+    } catch (error) {
+        
+    }
+}

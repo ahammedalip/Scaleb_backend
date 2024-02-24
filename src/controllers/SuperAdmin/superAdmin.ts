@@ -104,5 +104,25 @@ export const blockUser = async (req: Request, res: Response) => {
             console.log('error at block production or retailer user -->', error);
             res.status(500).json({ success: true, message: 'Error at Blocking user' })
         }
+    }else if(role == 'retailer'){
+        try {
+            const validUser = await retailerAdmin.findById(id)
+            if (!validUser) {
+                return res.status(404).json({ success: false, message: 'User not found' })
+            }
+            const isBlocked = validUser.isBlocked;
+
+            const updateStatus = await retailerAdmin.updateOne(
+                { _id: id },
+                { $set: { isBlocked: !isBlocked } })
+            if (!updateStatus) {
+                return res.status(500).json({ success: false, message: 'Error while blocking' })
+            }
+            const productionList = await retailerAdmin.find({ isVerified: true })
+            return res.status(200).json({ success: true, message: 'User blocked successfully', userlist:productionList})
+        } catch (error) {
+            console.log('error at block production or retailer user -->', error);
+            res.status(500).json({ success: true, message: 'Error at Blocking user' })
+        }
     }
 }
