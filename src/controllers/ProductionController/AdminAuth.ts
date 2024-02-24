@@ -79,9 +79,10 @@ export const otpVerification = async (req: Request, res: Response) => {
             res.status(401).json({ success: false, message: 'OTP entered is incorrect. Please try again.' })
         }
         if (verifyOTP) {
-            productionAdmin.updateOne(
+            const updated = await productionAdmin.updateOne(
                 { email }, { $set: { isVerified: true } }
-            )
+            );
+            console.log(updated);
             return res.status(200).json({ success: true, message: 'OTP verified successfully.' });
         }
     } catch (error) {
