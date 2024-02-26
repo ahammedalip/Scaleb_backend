@@ -7,7 +7,9 @@ interface UserInterface extends Document {
     isBlocked: boolean,
     role: string,
     otpCode: number,
-    isVerified: boolean
+    isVerified: boolean,
+    description:string,
+    availableItems:string[]
 }
 
 const userSchema = new Schema<UserInterface>({
@@ -40,6 +42,12 @@ const userSchema = new Schema<UserInterface>({
         type: Boolean,
         default: false
     },
+    description:{
+        type: String
+    },
+    availableItems:{
+        type:[String]
+    }
 })
 
 const productionAdmin = model<UserInterface>('ProductionAdmin', userSchema)

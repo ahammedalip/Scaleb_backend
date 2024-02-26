@@ -90,18 +90,18 @@ export const otpVerification = async (req: Request, res: Response) => {
         return res.status(500).json({ success: false, message: 'An internal server error occurred.' });
     }
 }
- 
+
 export const login = async (req: Request, res: Response) => {
     const { productionName, password } = req.body;
-   
+
     try {
         const validUser = await productionAdmin.findOne({ productionName })
- 
+
         if (!validUser) {
             res.status(401).json({ success: false, message: 'Enter valid credentials' })
         }
-       
-        const verifyPass = bcryptjs.compareSync( password, validUser.password)
+
+        const verifyPass = bcryptjs.compareSync(password, validUser.password)
         if (!verifyPass) {
             res.status(401).json({ success: false, message: 'Password is wrong' })
         }
@@ -116,4 +116,5 @@ export const login = async (req: Request, res: Response) => {
         res.status(500).json({ success: false, message: 'Internal server Error' })
     }
 }
- 
+
+
