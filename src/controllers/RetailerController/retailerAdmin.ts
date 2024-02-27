@@ -217,7 +217,8 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
       }else{
         const addReqRet = await retailerAdmin.findByIdAndUpdate(id, { $push: { requestedProduction: prodId } }, { new: true });
       console.log('mongo update', addReqRet);
-      if (addReqRet) {
+        const addReqProd = await productionAdmin.findByIdAndUpdate(prodId,{$push:{requestedRetailer: id}}, {new: true})
+      if (addReqRet && addReqProd) {
         return res.status(200).json({ success: true, message: 'requested' });
       } else {
         return res.status(404).json({ success: false, message: 'Retailer not found' });

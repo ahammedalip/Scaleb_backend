@@ -58,6 +58,30 @@ export const addItem = async (req: Request, res: Response) => {
 
 }
 
+export const fetchRequestedRetailers = async(req:Request, res:Response)=>{
+    const id = req.id;
+
+    try {
+        const fetchUser = await productionAdmin.findById(id).populate('requestedRetailer');
+        // if(fetchUser?.requestedRetailer)
+        console.log(fetchUser?.requestedRetailer);
+        const notBlockedRetailers: any = fetchUser?.requestedRetailer.filter(retailer => !retailer.isBlocked);
+
+        if (notBlockedRetailers.length >  0) {
+          console.log('Some requested retailers are :', notBlockedRetailers);
+          // Handle the case where some retailers are blocked
+        } else {
+          console.log('No requested retailers are blocked.');
+          // Handle the case where no retailers are blocked
+        }
+        return res.status(200).json({success: true, message: 'fetched users', userDetails:notBlockedRetailers})
+    } catch (error) {
+        
+    }
+}
+
+export const a
+
 
 
 
