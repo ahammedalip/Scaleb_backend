@@ -8,6 +8,10 @@ interface UserInterface extends Document{
     role: string,
     otpCode: number,
     isVerified: boolean,
+    description:string,
+    connectedProduction:mongoose.Schema.Types.ObjectId[],
+    requestedProduction: mongoose.Schema.Types.ObjectId[],
+    recievedProduction: mongoose.Schema.Types.ObjectId[],
 }
 
 const userSchema = new Schema<UserInterface>({
@@ -39,7 +43,23 @@ const userSchema = new Schema<UserInterface>({
     isVerified: {
         type: Boolean,
         default: false,
-    }
+    },
+    description:{
+        type:String
+    },
+    connectedProduction:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ProductionAdmin' 
+    }],
+    requestedProduction:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ProductionAdmin' 
+    }],
+    recievedProduction:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref: 'ProductionAdmin'
+    }],
+
 })
 
 const retailerAdmin = model<UserInterface>('RetailerAdmin', userSchema);

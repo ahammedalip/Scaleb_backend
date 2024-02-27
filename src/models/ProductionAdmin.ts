@@ -8,15 +8,17 @@ interface UserInterface extends Document {
     role: string,
     otpCode: number,
     isVerified: boolean,
-    description:string,
-    availableItems:string[]
+    description: string,
+    availableItems: string[],
+    requestedRetailer: mongoose.Schema.Types.ObjectId[],
+    connectedRetailer: mongoose.Schema.Types.ObjectId[],
+    recievedRetailer : mongoose.Schema.Types.ObjectId[],
 }
 
 const userSchema = new Schema<UserInterface>({
     productionName: {
         type: String,
         required: true
-
     },
     email: {
         type: String,
@@ -26,28 +28,41 @@ const userSchema = new Schema<UserInterface>({
         type: String,
         required: true,
     },
-    role:{
+    role: {
         type: String,
         default: 'production'
     },
-    otpCode:{
+    otpCode: {
         type: Number,
 
     },
-    isVerified:{
-        type:Boolean,
-        default:false
-    },
-    isBlocked:{
+    isVerified: {
         type: Boolean,
         default: false
     },
-    description:{
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
+    description: {
         type: String
     },
-    availableItems:{
-        type:[String]
-    }
+    availableItems: {
+        type: [String]
+    },
+    connectedRetailer: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'RetailerAdmin'
+    }],
+    requestedRetailer: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'RetailerAdmin'
+    }],
+    recievedRetailer:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'RetailerAdmin'
+    }]
+
 })
 
 const productionAdmin = model<UserInterface>('ProductionAdmin', userSchema)

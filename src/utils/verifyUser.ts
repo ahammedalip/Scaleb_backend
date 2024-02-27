@@ -2,12 +2,13 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import jwtDecode from 'jsonwebtoken'
 import productionAdmin from "../models/ProductionAdmin";
+import retailerAdmin from "../models/retailerAdmin";
 
 
 
 
 export const verifyRetailer = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('coming here to verify retailer admin');
+  // console.log('coming here to verify retailer admin');
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -19,11 +20,20 @@ export const verifyRetailer = async (req: Request, res: Response, next: NextFunc
   try {
 
     const decoded: any = jwt.decode(token);
-    console.log('decoded token from retailer is->', decoded); // This will log the decoded payload to the console
+    const verifyUser = await retailerAdmin.findById(decoded.id)
+    console.log('decoded token from retailer is->', decoded);
 
     if (decoded?.role !== 'retailerAdmin') {
       res.status(401).json({ success: false, message: 'Unauthorized user' })
     }
+
+    if( verifyUser?.isBlocked){
+      console.log('user is blocked');
+      return res.status(403).json({success:false, message: "User blocked "})
+    }
+    req.role = decoded.role;
+    req.id = decoded.id
+
     next()
 
   } catch (err) {
