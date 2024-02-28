@@ -81,7 +81,7 @@ export const otpVerification = async (req: Request, res: Response) => {
             res.status(401).json({ success: false, message: 'OTP entered is incorrect. Please try again.' })
         }
         if (verifyOTP) {
-            retailerAdmin.updateOne(
+           const updated= await retailerAdmin.updateOne(
                 { email }, { $set: { isVerified: true } }
             )
             return res.status(200).json({ success: true, message: 'OTP verified successfully.' });

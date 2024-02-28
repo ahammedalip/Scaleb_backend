@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import productionAdmin from '../../models/ProductionAdmin';
+import retailerAdmin from '../../models/retailerAdmin';
 
 interface CustomRequest extends Request {
     id: number,
@@ -21,7 +22,7 @@ export const getProfile = async (req: Request, res: Response) => {
         // console.log(verifyUser);
         res.status(200).json({ success: true, message: 'user details fetched successfully', userDetails: verifyUser })
     } catch (error) {
-        console.log('error at fetching profile',error);
+        console.log('error at fetching profile', error);
         return res.status(500).json({ success: false, message: 'Error while fetching profile' })
 
     }
@@ -52,13 +53,13 @@ export const addItem = async (req: Request, res: Response) => {
         return res.json({ success: true, userDetails: updatedUser });
 
     } catch (error) {
-        console.log('error at adding item ',error);
-        return res.status(500).json({success:false, message:'Error while adding item'})
+        console.log('error at adding item ', error);
+        return res.status(500).json({ success: false, message: 'Error while adding item' })
     }
 
 }
 
-export const fetchRequestedRetailers = async(req:Request, res:Response)=>{
+export const fetchRequestedRetailers = async (req: Request, res: Response) => {
     const id = req.id;
 
     try {
@@ -67,20 +68,66 @@ export const fetchRequestedRetailers = async(req:Request, res:Response)=>{
         console.log(fetchUser?.requestedRetailer);
         const notBlockedRetailers: any = fetchUser?.requestedRetailer.filter(retailer => !retailer.isBlocked);
 
-        if (notBlockedRetailers.length >  0) {
-          console.log('Some requested retailers are :', notBlockedRetailers);
-          // Handle the case where some retailers are blocked
+        if (notBlockedRetailers.length > 0) {
+            console.log('Some requested retailers are :', notBlockedRetailers);
+            // Handle the case where some retailers are blocked
         } else {
-          console.log('No requested retailers are blocked.');
-          // Handle the case where no retailers are blocked
+            console.log('No requested retailers are blocked.');
+            // Handle the case where no retailers are blocked
         }
-        return res.status(200).json({success: true, message: 'fetched users', userDetails:notBlockedRetailers})
+        return res.status(200).json({ success: true, message: 'fetched users', userDetails: notBlockedRetailers })
     } catch (error) {
-        
+
     }
 }
 
-export const a
+export const acceptReq = async (req: Request, res: Response) => {
+    const id = req.id;
+    const retailId = req.body.id
+    console.log(id, retailId);
+
+    try {
+        const verifyProduction = await productionAdmin.findById(id)
+        
+        if(verifyProduction?.isBlocked){
+            return res.status(403).json({success:false, message:"unauthorized user"})
+        }
+        const checkConnectionProd = await productionAdmin.findOne(
+            {$and:[
+                {_id:id},
+                {connectedRetailer:{$in:[retailId]}}
+            ]}
+        )
+
+        const checkConnectionRet = await retailerAdmin.findOne(
+            {$and:[
+                {_id:retailId},
+                {connectedProduction:{$in:[id]}}
+            ]}
+        )
+
+        if(checkConnectionProd||checkConnectionRet){
+            return res.status(200).json({success:true, message: 'already connected'})
+        }else{
+            const updateProd = await productionAdmin.findByIdAndUpdate(
+                id,
+                {$push:{connectedRetailer:retailId}},
+                {new:true});
+    
+            const updateRet = await retailerAdmin.findByIdAndUpdate(
+                retailId,
+                {$push:{connectedProduction:id}},
+                {new: true}
+            )
+            return res.status(200).json({success:true, message: 'User connected'})
+        }
+        
+        
+    } catch (error) {
+        console.error('Error processing connection request:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
 
 
 
