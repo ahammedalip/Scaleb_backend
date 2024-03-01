@@ -149,6 +149,21 @@ export const profile = async (req: Request, res: Response) => {
     }
 }
 
+export const connectedProd = async (req: Request, res: Response) => {
+    console.log('coming ar connected prod');
+    const id = req.id;
+    try {
+        const connected = await retailerAdmin.findOne(
+            { _id: id }
+        ).populate('connectedProduction'); // Corrected: Use the string 'connectedProduction'
+
+        // console.log(connected?.connectedProduction);
+        const availableProduction = connected?.connectedProduction
+        return res.status(200).json({ success: true, message: 'user list fetched successfully', availableProduction })
+    } catch (error) {
+
+    }
+}
 
 
 
@@ -158,10 +173,14 @@ export const avialableProd = async (req: Request, res: Response) => {
     const id = req.id
 
     try {
+        const retailer = await retailerAdmin.findById(id);
+
+        const connectedProd = retailer?.connectedProduction; // Correct variable name
+
         const availableProduction = await productionAdmin.find({
             isBlocked: false,
             isVerified: true,
-            _id: { $nin: retailerAdmin.connectedProduction } // Exclude IDs present in connectedProduction
+            _id: { $nin: connectedProd } // Use the correct variable here
         });
 
         console.log(availableProduction);
@@ -225,7 +244,7 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
                 return res.status(404).json({ success: false, message: 'Retailer not found' });
             }
         }
-        
+
     } catch (error) {
         console.error('Error processing connection request:', error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
