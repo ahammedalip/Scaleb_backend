@@ -43,6 +43,41 @@ export const verifyRetailer = async (req: Request, res: Response, next: NextFunc
   }
 }
 
+export const verifySales = async (req:Request, res:Response, next:NextFunction)=>{
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401); // If no token, return  401 Unauthorized
+  }
+
+
+  try {
+
+    const decoded: any = jwt.decode(token);
+    const verifyUser = await retailerAdmin.findById(decoded.id)
+    console.log('decoded token from retailer is->', decoded);
+
+    if (decoded?.role !== 'retailerSales') {
+      res.status(401).json({ success: false, message: 'Unauthorized user' })
+    }
+
+    if( verifyUser?.isBlocked){
+      console.log('user is blocked');
+      return res.status(403).json({success:false, message: "User blocked "})
+    }
+    req.role = decoded.role;
+    req.id = decoded.id
+
+    next()
+
+  } catch (err) {
+
+    console.error(err);
+    return res.sendStatus(403); // Forbidden
+  }
+}
+
 export const verifyAdmin = async (req: Request, res: Response, next: NextFunction) => {
 
   const authHeader = req.headers.authorization

@@ -13,6 +13,7 @@ import morgan from 'morgan';
 import errorHandlerMiddleware from './middleware/errohandlerMiddleware';
 import retailerAdmin from './routes/RetailerRoutes/retailerAdmin'
 import productionRoute from './routes/ProductionRoutes/productionRoute'
+import salesRoute from './routes/SalesRoutes/SalesRoutes'
 
 
 dotenv.config()
@@ -75,4 +76,5 @@ app.use('/retailer/auth',retailerAdminAuth)
 app.use('/retailer',retailerAdmin)
 app.use('/production/auth', productionAdminAuth )
 app.use('/production', productionRoute)
+app.use('/sales', salesRoute)
 
