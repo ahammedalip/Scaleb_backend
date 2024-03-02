@@ -21,6 +21,7 @@ export const getAvailableProduction = async (req: Request, res: Response) => {
         ).populate('connectedProduction'); // Specify the path to populate
 
         const connected = findProd?.connectedProduction
+        console.log('connected and available',connected);
         return res.status(200).json({success: true, message: 'user list fetched successfully', availableProduction:connected})
         
     } catch (error) {
