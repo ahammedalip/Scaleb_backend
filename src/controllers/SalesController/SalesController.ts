@@ -46,3 +46,15 @@ export const viewIndividualprofile = async(req:Request, res: Response)=>{
         res.status(500).json({success:false, message: 'error while user profile fetching'})
     }
 }
+
+export const createOrder = async (req:Request, res:Response) =>{
+    const id = req.id;
+    console.log('sales id ', id);
+    console.log('in createorder------',req.body);
+    try {
+        const validSales = await retailerSales.
+    } catch (error) {
+        
+    }
+    res.status(200).json({success:true})
+}
