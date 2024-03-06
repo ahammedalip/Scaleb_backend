@@ -59,3 +59,7 @@ const userSchema = new Schema<Order>({
 
 })
 
+const order = model<Order>('Order',userSchema)
+
+export default order;
+
