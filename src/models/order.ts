@@ -5,7 +5,6 @@ interface Order extends Document {
     production:mongoose.Schema.Types.ObjectId;
     salesExec: mongoose.Schema.Types.ObjectId;
     retailerId:mongoose.Schema.Types.ObjectId;
-    createdDate: Date;
     scheduledDate: Date;
     imageURL:string[];
     quantity:number;
@@ -29,10 +28,6 @@ const userSchema = new Schema<Order>({
         type:mongoose.Schema.Types.ObjectId,
         ref:'RetailerAdmin'
     },
-    createdDate:{
-        type:Date,
-        default:Date.now
-    },
     scheduledDate:{
         type:Date
     },
@@ -48,6 +43,7 @@ const userSchema = new Schema<Order>({
     },
     blocked:{
         type:Boolean,
+        default: false
     },
     accepted:{
         type:Boolean,
@@ -57,7 +53,7 @@ const userSchema = new Schema<Order>({
     },
 
 
-})
+},{timestamps:true})
 
 const order = model<Order>('Order',userSchema)
 

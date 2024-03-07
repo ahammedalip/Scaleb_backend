@@ -51,7 +51,6 @@ export const verifySales = async (req:Request, res:Response, next:NextFunction)=
     return res.sendStatus(401); // If no token, return  401 Unauthorized
   }
 
-
   try {
 
     const decoded: any = jwt.decode(token);
