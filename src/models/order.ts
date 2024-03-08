@@ -2,25 +2,26 @@
 import mongoose, { Document, Schema, model } from "mongoose";
 
 interface Order extends Document {
-    production:mongoose.Schema.Types.ObjectId;
-    salesExec: mongoose.Schema.Types.ObjectId;
+    productionId:mongoose.Schema.Types.ObjectId;
+    salesExecId: mongoose.Schema.Types.ObjectId;
     retailerId:mongoose.Schema.Types.ObjectId;
     scheduledDate: Date;
     imageURL:string[];
     quantity:number;
     status: string;
     blocked:boolean;
-    accepted:boolean;
+    accepted:string;
     description: string;
+    item:string;
 
 }
 
-const userSchema = new Schema<Order>({
-    production: {
+const OrderSchema = new Schema<Order>({
+    productionId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ProductionAdmin'
     },
-    salesExec:{
+    salesExecId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'RetailerSales'
     },
@@ -46,16 +47,20 @@ const userSchema = new Schema<Order>({
         default: false
     },
     accepted:{
-        type:Boolean,
+        type:String,
+        default: 'No'
     },
     description:{
         type:String,
     },
+    item:{
+        type:String,
+    }
 
 
 },{timestamps:true})
 
-const order = model<Order>('Order',userSchema)
+const order = model<Order>('Order',OrderSchema)
 
 export default order;
 

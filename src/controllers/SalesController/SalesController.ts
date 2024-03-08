@@ -4,6 +4,7 @@ import retailerSales from "../../models/RetailerSales";
 import exp from "constants";
 import productionAdmin from "../../models/ProductionAdmin";
 import order from "../../models/order";
+import { Document, Model, model, Schema, Types } from 'mongoose';
 
 
 
@@ -21,7 +22,7 @@ export const getAvailableProduction = async (req: Request, res: Response) => {
         ).populate('connectedProduction'); // Specify the path to populate
 
         const connected = findProd?.connectedProduction
-        // console.log('connected and available',connected);
+
         return res.status(200).json({ success: true, message: 'user list fetched successfully', availableProduction: connected })
 
     } catch (error) {
@@ -49,7 +50,7 @@ export const viewIndividualprofile = async (req: Request, res: Response) => {
 
 export const createOrder = async (req: Request, res: Response) => {
     const id = req.id;
-    console.log('sales id ', id);
+    // console.log('sales id ', id);
     // console.log('in createorder------', req.body);
     const { productionId, selectedProduct, scheduledDate, quantity, urls, description } = req.body
     console.log('production id', productionId, 'selectedproduct', selectedProduct, 'scheduled date', scheduledDate, 'quantity', quantity, 'urls', urls, 'description', description);
@@ -65,22 +66,41 @@ export const createOrder = async (req: Request, res: Response) => {
 
 
         const newOrder = new order({
-            production: productionId,
-            salesExec: id, 
-            retailerId: retailerAdmin, 
+            productionId,
+            item:selectedProduct,
+            salesExecId: id,
+            retailerId: retailerAdmin,
             scheduledDate: date,
-            imageURL: urls, 
+            imageURL: urls,
             quantity: quantity,
-            status: "Pending", 
+            status: "Pending",
             description: description,
             accepted: false
         })
         await newOrder.save();
-        res.status(200).json({success: true, message: 'order created successfully'})
+        res.status(200).json({ success: true, message: 'order created successfully' })
 
     } catch (error) {
-        console.log('error at creating order',error);
-        res.status(500).json({success:false, message: 'Error while creating order'})
+        console.log('error at creating order', error);
+        res.status(500).json({ success: false, message: 'Error while creating order' })
     }
-    
+
+}
+
+export const fetchOrder = async (req: Request, res: Response) => {
+    console.log('coming here');
+    const id = req.id
+    try {
+        const getOrder = await order.find({
+            salesExecId: id
+        }).populate('productionId')
+     console.log('orders are', getOrder);
+
+       
+        res.status(200).json({ success: true, message: 'order fetched successfully', orders:getOrder})
+
+    } catch (error) {
+        console.log('error at fetching order of sales executive', error);
+        res.status(500).json({ success: false, message: 'error while fetching orders' })
+    }
 }
