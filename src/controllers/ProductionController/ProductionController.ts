@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import productionAdmin from '../../models/ProductionAdmin';
 import retailerAdmin from '../../models/retailerAdmin';
+import order from '../../models/order';
 
 interface CustomRequest extends Request {
     id: number,
@@ -88,41 +89,45 @@ export const acceptReq = async (req: Request, res: Response) => {
 
     try {
         const verifyProduction = await productionAdmin.findById(id)
-        
-        if(verifyProduction?.isBlocked){
-            return res.status(403).json({success:false, message:"unauthorized user"})
+
+        if (verifyProduction?.isBlocked) {
+            return res.status(403).json({ success: false, message: "unauthorized user" })
         }
         const checkConnectionProd = await productionAdmin.findOne(
-            {$and:[
-                {_id:id},
-                {connectedRetailer:{$in:[retailId]}}
-            ]}
+            {
+                $and: [
+                    { _id: id },
+                    { connectedRetailer: { $in: [retailId] } }
+                ]
+            }
         )
 
         const checkConnectionRet = await retailerAdmin.findOne(
-            {$and:[
-                {_id:retailId},
-                {connectedProduction:{$in:[id]}}
-            ]}
+            {
+                $and: [
+                    { _id: retailId },
+                    { connectedProduction: { $in: [id] } }
+                ]
+            }
         )
 
-        if(checkConnectionProd||checkConnectionRet){
-            return res.status(200).json({success:true, message: 'already connected'})
-        }else{
+        if (checkConnectionProd || checkConnectionRet) {
+            return res.status(200).json({ success: true, message: 'already connected' })
+        } else {
             const updateProd = await productionAdmin.findByIdAndUpdate(
                 id,
-                {$push:{connectedRetailer:retailId}},
-                {new:true});
-    
+                { $push: { connectedRetailer: retailId } },
+                { new: true });
+
             const updateRet = await retailerAdmin.findByIdAndUpdate(
                 retailId,
-                {$push:{connectedProduction:id}},
-                {new: true}
+                { $push: { connectedProduction: id } },
+                { new: true }
             )
-            return res.status(200).json({success:true, message: 'User connected'})
+            return res.status(200).json({ success: true, message: 'User connected' })
         }
-        
-        
+
+
     } catch (error) {
         console.error('Error processing connection request:', error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
@@ -130,8 +135,40 @@ export const acceptReq = async (req: Request, res: Response) => {
 }
 
 
+export const fetchOrders = async (req: Request, res: Response) => {
+    const id = req.id
+    try {
+        const orders = await order.find({
+            productionId: id
+        }).populate('retailerId').populate('salesExecId')
+        console.log(orders);
+        return res.status(200).json({ success: true, message: 'order list fetched successfully', orders })
+    } catch (error) {
+        console.log('error at fetch order', error);
+        return res.status(500).json({ success: false, message: 'error at fetching order ' })
+    }
 
+}
 
+export const acceptOrder = async (req: Request, res: Response) => {
+    const id = req.id
 
+    const orderId = req.body.orderId
 
+    try {
+        const existingOrder = await order.findById(orderId)
 
+        if (!existingOrder) {
+            return res.status(404).json({ success: false, message: 'Order not found!' })
+        }
+
+        existingOrder.accepted = 'Yes'
+
+        await existingOrder.save()
+
+        return res.status(200).json({success: true, message: 'Order accepted'})
+
+    } catch (error) {
+
+    }
+}
