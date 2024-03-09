@@ -166,9 +166,33 @@ export const acceptOrder = async (req: Request, res: Response) => {
 
         await existingOrder.save()
 
-        return res.status(200).json({success: true, message: 'Order accepted'})
+        return res.status(200).json({ success: true, message: 'Order accepted' })
 
     } catch (error) {
+        console.log('error at accepting order', error);
+        return res.status(500).json({ success: false, message: 'error at accepting order ' })
+    }
+}
 
+
+export const rejectOrder = async (req: Request, res: Response) => {
+    const id = req.id
+    const  orderId  = req.body.orderId
+    console.log('coming to reject order', id, orderId);
+    try {
+        const existingOrder = await order.findById(orderId)
+
+        if (!existingOrder) {
+            return res.status(404).json({ success: false, message: 'Order not found!' })
+        }
+
+        existingOrder.accepted = 'Rejected'
+
+        await existingOrder.save()
+
+        return res.status(200).json({ success: true, message: 'Order rejected' })
+    } catch (error) {
+        console.log('error at rejecting order', error);
+        return res.status(500).json({ success: false, message: 'error at rejecting order ' })
     }
 }
