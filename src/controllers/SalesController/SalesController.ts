@@ -75,7 +75,7 @@ export const createOrder = async (req: Request, res: Response) => {
             quantity: quantity,
             status: "Pending",
             description: description,
-            accepted: false
+            accepted: 'No'
         })
         await newOrder.save();
         res.status(200).json({ success: true, message: 'order created successfully' })
@@ -88,7 +88,7 @@ export const createOrder = async (req: Request, res: Response) => {
 }
 
 export const fetchOrder = async (req: Request, res: Response) => {
-    console.log('coming here');
+
     const id = req.id
     try {
         const getOrder = await order.find({
@@ -103,4 +103,15 @@ export const fetchOrder = async (req: Request, res: Response) => {
         console.log('error at fetching order of sales executive', error);
         res.status(500).json({ success: false, message: 'error while fetching orders' })
     }
+}
+
+export const editOrderRequest = async (req:Request, res:Response) => {
+ const id = req.id
+ console.log('from req.body',req.body);
+ try{
+
+
+ }catch(error){
+
+ }
 }
