@@ -34,7 +34,6 @@ export const getProfile = async (req: Request, res: Response) => {
 export const addItem = async (req: Request, res: Response) => {
     const userId = req.id;
     const { name } = req.body
-    console.log(name, 'id', userId);
 
     try {
         const verifyUser = await productionAdmin.findById(userId)
@@ -66,8 +65,7 @@ export const fetchRequestedRetailers = async (req: Request, res: Response) => {
 
     try {
         const fetchUser = await productionAdmin.findById(id).populate('requestedRetailer');
-        // if(fetchUser?.requestedRetailer)
-        console.log(fetchUser?.requestedRetailer);
+       
         const notBlockedRetailers: any = fetchUser?.requestedRetailer.filter(retailer => !retailer.isBlocked);
 
         if (notBlockedRetailers.length > 0) {
@@ -86,7 +84,7 @@ export const fetchRequestedRetailers = async (req: Request, res: Response) => {
 export const acceptReq = async (req: Request, res: Response) => {
     const id = req.id;
     const retailId = req.body.id
-    console.log(id, retailId);
+    
 
     try {
         const verifyProduction = await productionAdmin.findById(id)
@@ -209,7 +207,6 @@ export const availableSales = async (req: Request, res: Response) => {
             retailerAdminId: { $in: connectedRetailerId },
             isBlocked:false
         })
-        console.log('---------------',salesExecutive);
         return res.status(200).json({success:true, message: 'Sales executives list fetched successfully', salesExecutive})
     } catch (error) {
         console.log('Error at fetching sales executives', error);
