@@ -13,6 +13,7 @@ interface Order extends Document {
     accepted:string;
     description: string;
     item:string;
+    updateRequest:string;
 
 }
 
@@ -55,6 +56,10 @@ const OrderSchema = new Schema<Order>({
     },
     item:{
         type:String,
+    },
+    updateRequest:{
+        type:String,
+
     }
 
 
