@@ -1,6 +1,6 @@
 import express from 'express'
 import { verifyProduction } from '../../utils/verifyUser';
-import { acceptOrder, acceptReq, addItem, fetchOrders, fetchRequestedRetailers, getProfile, rejectOrder } from '../../controllers/ProductionController/ProductionController';
+import { acceptOrder, acceptReq, addItem, availableSales, fetchOrders, fetchRequestedRetailers, getProfile, rejectOrder } from '../../controllers/ProductionController/ProductionController';
 
 
 
@@ -14,6 +14,7 @@ router.post('/acc-req', verifyProduction, acceptReq)
 router.get('/orders', verifyProduction,fetchOrders)
 router.patch('/order-acc', verifyProduction,acceptOrder)
 router.patch('/order-rej', verifyProduction,rejectOrder)
+router.get('/available-sales', verifyProduction,availableSales)
 
 
 
