@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import productionAdmin from '../../models/ProductionAdmin';
 import retailerAdmin from '../../models/retailerAdmin';
 import order from '../../models/order';
+import retailerSales from '../../models/RetailerSales';
 
 interface CustomRequest extends Request {
     id: number,
@@ -177,7 +178,7 @@ export const acceptOrder = async (req: Request, res: Response) => {
 
 export const rejectOrder = async (req: Request, res: Response) => {
     const id = req.id
-    const  orderId  = req.body.orderId
+    const orderId = req.body.orderId
     console.log('coming to reject order', id, orderId);
     try {
         const existingOrder = await order.findById(orderId)
@@ -194,5 +195,24 @@ export const rejectOrder = async (req: Request, res: Response) => {
     } catch (error) {
         console.log('error at rejecting order', error);
         return res.status(500).json({ success: false, message: 'error at rejecting order ' })
+    }
+}
+
+export const availableSales = async (req: Request, res: Response) => {
+    const id = req.id;
+
+    try {
+        const productionAdminDoc = await productionAdmin.findById(id).populate('connectedRetailer')
+        const connectedRetailerId = productionAdminDoc?.connectedRetailer.map(retailer => retailer._id)
+
+        const salesExecutive = await retailerSales.find({
+            retailerAdminId: { $in: connectedRetailerId },
+            isBlocked:false
+        })
+        console.log('---------------',salesExecutive);
+        return res.status(200).json({success:true, message: 'Sales executives list fetched successfully', salesExecutive})
+    } catch (error) {
+        console.log('Error at fetching sales executives', error);
+        return res.status(500).json({success:false, message: 'Error at fetching sales executives'})
     }
 }
