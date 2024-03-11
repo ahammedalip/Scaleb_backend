@@ -67,7 +67,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
         const newOrder = new order({
             productionId,
-            item:selectedProduct,
+            item: selectedProduct,
             salesExecId: id,
             retailerId: retailerAdmin,
             scheduledDate: date,
@@ -94,10 +94,10 @@ export const fetchOrder = async (req: Request, res: Response) => {
         const getOrder = await order.find({
             salesExecId: id
         }).populate('productionId')
-     console.log('orders are', getOrder);
+        console.log('orders are', getOrder);
 
-       
-        res.status(200).json({ success: true, message: 'order fetched successfully', orders:getOrder})
+
+        res.status(200).json({ success: true, message: 'order fetched successfully', orders: getOrder })
 
     } catch (error) {
         console.log('error at fetching order of sales executive', error);
@@ -105,13 +105,46 @@ export const fetchOrder = async (req: Request, res: Response) => {
     }
 }
 
-export const editOrderRequest = async (req:Request, res:Response) => {
- const id = req.id
- console.log('from req.body',req.body);
- try{
+export const editOrderRequest = async (req: Request, res: Response) => {
+    const orderId = req.body.orderId
+    console.log(orderId, 'from edit order request');
+    try {
+        const editOrder = await order.findById(orderId)
+
+        if (!editOrder) {
+            return res.status(404).json({ success: false, message: 'Order not found' })
+        }
+
+        editOrder.updateRequest = 'Requested'
+        editOrder.save()
+        return res.status(200).json({ success: true, message:'requested for editing'})
 
 
- }catch(error){
+    } catch (error) {
+        console.log('error at requesting for edit', error);
+        res.status(500).json({success:false, message: 'error at requesting for edit'})
+    }
+}
 
- }
+export const editOrder = async (req: Request, res: Response) => {
+    const id = req.id
+    console.log('from req.body', req.body);
+    try {
+
+
+    } catch (error) {
+
+    }
+}
+
+export const deleteOrder = async (req: Request, res: Response) => {
+    const id = req.id
+    const orderId = req.body.orderId
+    try {
+        const validOrder = await order.findByIdAndDelete(orderId)
+        return res.status(200).json({ success: true, message: 'Order deleted successfully' })
+    } catch (error) {
+        console.log('error while deleting order', error);
+        res.status(500).json({ success: false, message: 'Error in deleting order' })
+    }
 }
