@@ -14,12 +14,20 @@ import errorHandlerMiddleware from './middleware/errohandlerMiddleware';
 import retailerAdmin from './routes/RetailerRoutes/retailerAdmin'
 import productionRoute from './routes/ProductionRoutes/productionRoute'
 import salesRoute from './routes/SalesRoutes/SalesRoutes'
+import messageRoute from './routes/messageRoute'
 
 
 dotenv.config()
 const app: Express = express();
 const server = http.createServer(app); 
 const mongoURL: string = process.env.MONGO!
+const io = new Server(server, {
+  cors: {
+     origin: "http://localhost:5173", // Allow requests from your client's origin
+     methods: ["GET", "POST"], // Specify the methods allowed
+     credentials: true, // Allow credentials to be sent with requests
+  },
+ });
 
 app.use(express.json());
 app.use(cookieParser())
@@ -28,11 +36,16 @@ app.use(cors({
     origin: 'http://localhost:5173', 
     credentials: true
 }))
-// const io = new Server(server); 
 
-// app.get('/', (req, res) => {
-//     res.send('welcome to home');
-// });
+// emitting a message to a specific user
+io.on('connection', (socket) => {
+  console.log('A user connected');
+ 
+  socket.on('disconnect', () => {
+     console.log('User disconnected');
+  });
+ });
+ 
 
 app.use(
     session({
@@ -77,4 +90,5 @@ app.use('/retailer',retailerAdmin)
 app.use('/production/auth', productionAdminAuth )
 app.use('/production', productionRoute)
 app.use('/sales', salesRoute)
+app.use('/message',messageRoute)
 
