@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import session from 'express-session'
-import retailerAdmin from "../../models/retailerAdmin";
+import retailerAdmin from "../../models/RetailerAdmin";
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer'
 import jwt, { JsonWebTokenError } from "jsonwebtoken";

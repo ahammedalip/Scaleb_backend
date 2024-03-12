@@ -1,8 +1,8 @@
-import superAdmin from "../../models/superAdmin";
+import superAdmin from "../../models/SuperAdmin";
 import { NextFunction, Request, Response } from 'express';
 import { errorhandler } from "../../utils/errorhandler";
 import jwt from 'jsonwebtoken'
-import retailerAdmin from "../../models/retailerAdmin";
+import retailerAdmin from "../../models/RetailerAdmin";
 import productionAdmin from "../../models/ProductionAdmin";
 import { rmSync } from "fs";
 

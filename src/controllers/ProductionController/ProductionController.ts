@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import productionAdmin from '../../models/ProductionAdmin';
-import retailerAdmin from '../../models/retailerAdmin';
-import order from '../../models/order';
+import retailerAdmin from '../../models/RetailerAdmin';
+import order from '../../models/Order';
 import retailerSales from '../../models/RetailerSales';
 
 interface CustomRequest extends Request {
@@ -213,3 +213,4 @@ export const availableSales = async (req: Request, res: Response) => {
         return res.status(500).json({success:false, message: 'Error at fetching sales executives'})
     }
 }
+

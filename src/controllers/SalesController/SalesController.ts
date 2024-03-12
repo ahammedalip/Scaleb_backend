@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
-import retailerAdmin from "../../models/retailerAdmin";
+import retailerAdmin from "../../models/RetailerAdmin";
 import retailerSales from "../../models/RetailerSales";
 import exp from "constants";
 import productionAdmin from "../../models/ProductionAdmin";
-import order from "../../models/order";
+import order from "../../models/Order";
 import { Document, Model, model, Schema, Types } from 'mongoose';
 
 

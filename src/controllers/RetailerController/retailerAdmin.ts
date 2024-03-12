@@ -2,7 +2,7 @@ import exp from "constants";
 import { Request, Response } from "express";
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer';
-import retailerAdmin from "../../models/retailerAdmin";
+import retailerAdmin from "../../models/RetailerAdmin";
 import retailerSales from "../../models/RetailerSales";
 import productionAdmin from "../../models/ProductionAdmin";
 
