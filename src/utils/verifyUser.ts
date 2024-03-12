@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import jwtDecode from 'jsonwebtoken'
 import productionAdmin from "../models/ProductionAdmin";
-import retailerAdmin from "../models/retailerAdmin";
+import retailerAdmin from "../models/RetailerAdmin";
 
 
 
@@ -132,6 +132,37 @@ export const verifyProduction = async (req: Request, res: Response, next: NextFu
 
   } catch (err) {
     // Handle the error if the token is not valid
+    console.error(err);
+    return res.sendStatus(403); // Forbidden
+  }
+}
+
+export const verifySender = async (req:Request,res:Response, next:NextFunction) =>{
+  const authHeader = req.headers.authorization
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401); // If no token, return  401 Unauthorized
+  }
+
+  try {
+
+    const decoded: any = jwt.decode(token)
+    console.log('decoded token from verify admin', decoded); // This will log the decoded payload to the console
+
+    const verifyUser = await productionAdmin.findById(decoded.id)
+    
+    
+    if( verifyUser?.isBlocked){
+      console.log('user is blocked');
+      return res.status(403).json({success:false, message: "User blocked "})
+    }
+    req.role = decoded.role;
+    req.id = decoded.id
+    return next()
+
+  } catch (err) {
+    
     console.error(err);
     return res.sendStatus(403); // Forbidden
   }
