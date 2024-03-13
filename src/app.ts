@@ -14,20 +14,13 @@ import errorHandlerMiddleware from './middleware/errohandlerMiddleware';
 import retailerAdmin from './routes/RetailerRoutes/retailerAdmin'
 import productionRoute from './routes/ProductionRoutes/productionRoute'
 import salesRoute from './routes/SalesRoutes/SalesRoutes'
-import messageRoute from './routes/messageRoute'
-
+import conversationRoute from './routes/conversationRoute'
+import messageRoute from './routes/messagesRoute'
 
 dotenv.config()
 const app: Express = express();
 const server = http.createServer(app); 
 const mongoURL: string = process.env.MONGO!
-const io = new Server(server, {
-  cors: {
-     origin: "http://localhost:5173", // Allow requests from your client's origin
-     methods: ["GET", "POST"], // Specify the methods allowed
-     credentials: true, // Allow credentials to be sent with requests
-  },
- });
 
 app.use(express.json());
 app.use(cookieParser())
@@ -37,14 +30,7 @@ app.use(cors({
     credentials: true
 }))
 
-// emitting a message to a specific user
-io.on('connection', (socket) => {
-  console.log('A user connected');
- 
-  socket.on('disconnect', () => {
-     console.log('User disconnected');
-  });
- });
+
  
 
 app.use(
@@ -57,7 +43,7 @@ app.use(
 app.use(errorHandlerMiddleware);
 // Example CORS middleware in Express
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:5173'); // Replace with your frontend URL
+    res.header('Access-Control-Allow-Origin', 'http://localhost:5173'); 
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     next();
   });
@@ -69,14 +55,6 @@ mongoose.connect(mongoURL).then(()=>{
 }).catch((err)=>{
     console.log('Error in mongoDB', err);
 })
-
-// io.on('connection', (socket) => {
-//     console.log('A user connected');
-    
-//   socket.on('disconnect', () => {
-//         console.log('User disconnected');
-//     });
-// });
 
 
 server.listen(3000, () => {
@@ -90,5 +68,6 @@ app.use('/retailer',retailerAdmin)
 app.use('/production/auth', productionAdminAuth )
 app.use('/production', productionRoute)
 app.use('/sales', salesRoute)
-app.use('/message',messageRoute)
+app.use('/conversation',conversationRoute)
+app.use('/messages', messageRoute)
 
