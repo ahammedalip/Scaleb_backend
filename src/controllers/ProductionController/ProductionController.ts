@@ -214,3 +214,19 @@ export const availableSales = async (req: Request, res: Response) => {
     }
 }
 
+
+export const getSalesProfile = async (req:Request, res:Response) =>{
+    const salesId = req.body.salesId
+
+    try {
+        const salesExecutive = await retailerSales.findById(salesId);
+
+        if(salesExecutive?.isBlocked){
+            return res.status(403).json({success:false, message: 'user is blocked'})
+        }
+         res.status(200).json({success:true, salesExecutive})
+    } catch (error) {
+        console.log('Error at fetching sales executives', error);
+        return res.status(500).json({success:false, message: 'Error at fetching sales executives'})
+    }
+}
