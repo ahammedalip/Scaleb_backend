@@ -5,17 +5,12 @@ import { Conversation } from '../models/Conversations';
 
 
 export const conversation = async(req:Request, res:Response) =>{
-  console.log('ids----------------')
-  console.log('sender is ---',req.body.senderId, 'recipient is --', req.body.recipientId);
-
     try {
         const existingConversation = await Conversation.find({
             members: {$all:[req.body.senderId, req.body.recipientId]}
         })
-        console.log('existing conversation---', existingConversation)
 
         if(existingConversation.length>0){
-            console.log('coming into existing convee');
             return res.status(200).json({success: true, existing: 'true' })
         }
         const newConversation = new Conversation ({
