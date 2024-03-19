@@ -1,5 +1,5 @@
 import express from 'express'
-import { createOrder, deleteOrder, editOrder, editOrderRequest, fetchOrder, getAvailableProduction, viewIndividualprofile } from '../../controllers/SalesController/SalesController';
+import { createOrder, deleteOrder, editOrder, editOrderRequest, fetchOrder, getAvailableProduction, productionProfile, viewIndividualprofile } from '../../controllers/SalesController/SalesController';
 import { verifySales } from '../../utils/verifyUser';
 
 
@@ -13,6 +13,7 @@ router.get('/orders', verifySales, fetchOrder)
 router.patch('/edit-req', verifySales, editOrderRequest)
 router.patch('/edit-order', verifySales,editOrder )
 router.delete('/deleteOrder', verifySales,deleteOrder)
+router.post('/prod-profile',verifySales,productionProfile)
 
 
 export default router;

@@ -119,12 +119,12 @@ export const editOrderRequest = async (req: Request, res: Response) => {
 
         editOrder.updateRequest = 'Requested'
         editOrder.save()
-        return res.status(200).json({ success: true, message:'requested for editing'})
+        return res.status(200).json({ success: true, message: 'requested for editing' })
 
 
     } catch (error) {
         console.log('error at requesting for edit', error);
-        res.status(500).json({success:false, message: 'error at requesting for edit'})
+        res.status(500).json({ success: false, message: 'error at requesting for edit' })
     }
 }
 
@@ -148,5 +148,26 @@ export const deleteOrder = async (req: Request, res: Response) => {
     } catch (error) {
         console.log('error while deleting order', error);
         res.status(500).json({ success: false, message: 'Error in deleting order' })
+    }
+}
+
+
+// 
+export const productionProfile = async (req: Request, res: Response) => {
+
+    const prodId = req.body.prodId
+    console.log('productionId', prodId)
+
+    try {
+        const profile = await productionAdmin.findById(prodId)
+        if (profile?.isBlocked) {
+            return res.status(403).json({ success: false, message: 'user is blocked' })
+        }
+
+        res.status(200).json({ success: true, profile })
+
+    } catch (error) {
+        console.log('error while fetching production ', error);
+        res.status(500).json({ success: false, message: 'error while fetching production' })
     }
 }
