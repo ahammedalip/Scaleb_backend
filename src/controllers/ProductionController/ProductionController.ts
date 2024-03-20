@@ -69,10 +69,10 @@ export const fetchRequestedRetailers = async (req: Request, res: Response) => {
         const notBlockedRetailers: any = fetchUser?.requestedRetailer.filter(retailer => !retailer.isBlocked);
 
         if (notBlockedRetailers.length > 0) {
-            console.log('Some requested retailers are :', notBlockedRetailers);
+            // console.log('Some requested retailers are :', notBlockedRetailers);
             // Handle the case where some retailers are blocked
         } else {
-            console.log('No requested retailers are blocked.');
+            // console.log('No requested retailers are blocked.');
             // Handle the case where no retailers are blocked
         }
         return res.status(200).json({ success: true, message: 'fetched users', userDetails: notBlockedRetailers })
@@ -140,7 +140,7 @@ export const fetchOrders = async (req: Request, res: Response) => {
         const orders = await order.find({
             productionId: id
         }).populate('retailerId').populate('salesExecId')
-        console.log(orders);
+        // console.log(orders);
         return res.status(200).json({ success: true, message: 'order list fetched successfully', orders })
     } catch (error) {
         console.log('error at fetch order', error);
@@ -177,7 +177,7 @@ export const acceptOrder = async (req: Request, res: Response) => {
 export const rejectOrder = async (req: Request, res: Response) => {
     const id = req.id
     const orderId = req.body.orderId
-    console.log('coming to reject order', id, orderId);
+    // console.log('coming to reject order', id, orderId);
     try {
         const existingOrder = await order.findById(orderId)
 

@@ -16,7 +16,7 @@ export const getAvailableProduction = async (req: Request, res: Response) => {
 
     try {
         const findAdmin = await retailerSales.findById(id)
-        console.log(findAdmin?.retailerAdminId);
+        // console.log(findAdmin?.retailerAdminId);
         const adminId = findAdmin?.retailerAdminId;
 
         const findProd = await retailerAdmin.findOne(
@@ -36,7 +36,7 @@ export const getAvailableProduction = async (req: Request, res: Response) => {
 
 export const viewIndividualprofile = async (req: Request, res: Response) => {
     const productionId = req.query.id
-    console.log('production id', productionId);
+    // console.log('production id', productionId);
     try {
         const production = await productionAdmin.findById(productionId)
 
@@ -55,7 +55,7 @@ export const createOrder = async (req: Request, res: Response) => {
     // console.log('sales id ', id);
     // console.log('in createorder------', req.body);
     const { productionId, selectedProduct, scheduledDate, quantity, urls, description } = req.body
-    console.log('production id', productionId, 'selectedproduct', selectedProduct, 'scheduled date', scheduledDate, 'quantity', quantity, 'urls', urls, 'description', description);
+    // console.log('production id', productionId, 'selectedproduct', selectedProduct, 'scheduled date', scheduledDate, 'quantity', quantity, 'urls', urls, 'description', description);
     try {
         const date = new Date(scheduledDate);
         const validProduction = await productionAdmin.findById(productionId)
@@ -96,7 +96,7 @@ export const fetchOrder = async (req: Request, res: Response) => {
         const getOrder = await order.find({
             salesExecId: id
         }).populate('productionId')
-        console.log('orders are', getOrder);
+        // console.log('orders are', getOrder);
 
 
         res.status(200).json({ success: true, message: 'order fetched successfully', orders: getOrder })
@@ -109,7 +109,7 @@ export const fetchOrder = async (req: Request, res: Response) => {
 
 export const editOrderRequest = async (req: Request, res: Response) => {
     const orderId = req.body.orderId
-    console.log(orderId, 'from edit order request');
+    // console.log(orderId, 'from edit order request');
     try {
         const editOrder = await order.findById(orderId)
 
@@ -156,7 +156,7 @@ export const deleteOrder = async (req: Request, res: Response) => {
 export const productionProfile = async (req: Request, res: Response) => {
 
     const prodId = req.body.prodId
-    console.log('productionId', prodId)
+    // console.log('productionId', prodId)
 
     try {
         const profile = await productionAdmin.findById(prodId)
