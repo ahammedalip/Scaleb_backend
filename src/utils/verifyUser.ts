@@ -21,7 +21,7 @@ export const verifyRetailer = async (req: Request, res: Response, next: NextFunc
 
     const decoded: any = jwt.decode(token);
     const verifyUser = await retailerAdmin.findById(decoded.id)
-    console.log('decoded token from retailer is->', decoded);
+    // console.log('decoded token from retailer is->', decoded);
 
     if (decoded?.role !== 'retailerAdmin') {
       res.status(401).json({ success: false, message: 'Unauthorized user' })
@@ -55,7 +55,7 @@ export const verifySales = async (req:Request, res:Response, next:NextFunction)=
 
     const decoded: any = jwt.decode(token);
     const verifyUser = await retailerAdmin.findById(decoded.id)
-    console.log('decoded token from retailer is->', decoded);
+    // console.log('decoded token from retailer is->', decoded);
 
     if (decoded?.role !== 'retailerSales') {
       res.status(401).json({ success: false, message: 'Unauthorized user' })
@@ -89,7 +89,7 @@ export const verifyAdmin = async (req: Request, res: Response, next: NextFunctio
   try {
 
     const decoded: any = jwt.decode(token)
-    console.log('decoded token from verify admin', decoded); // This will log the decoded payload to the console
+    // console.log('decoded token from verify admin', decoded); // This will log the decoded payload to the console
     if (decoded?.role !== 'SuperAdmin') {
       res.status(401).json({ success: false, message: 'Unauthorized user' })
     }
@@ -115,7 +115,7 @@ export const verifyProduction = async (req: Request, res: Response, next: NextFu
   try {
 
     const decoded: any = jwt.decode(token)
-    console.log('decoded token from verify admin', decoded); // This will log the decoded payload to the console
+    // console.log('decoded token from verify admin', decoded); // This will log the decoded payload to the console
 
     const verifyUser = await productionAdmin.findById(decoded.id)
     if (decoded?.role !== 'productionAdmin' || !verifyUser) {
@@ -129,7 +129,6 @@ export const verifyProduction = async (req: Request, res: Response, next: NextFu
     req.role = decoded.role;
     req.id = decoded.id
     return next()
-
   } catch (err) {
     // Handle the error if the token is not valid
     console.error(err);
@@ -148,7 +147,7 @@ export const verifySender = async (req:Request,res:Response, next:NextFunction) 
   try {
 
     const decoded: any = jwt.decode(token)
-    console.log('decoded token from verify admin', decoded); // This will log the decoded payload to the console
+    // console.log('decoded token from verify admin', decoded); // This will log the decoded payload to the console
 
     const verifyUser = await productionAdmin.findById(decoded.id)
     
