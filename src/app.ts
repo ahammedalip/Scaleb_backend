@@ -6,7 +6,6 @@ import superAdmin from './routes/superAdmin';
 import retailerAdminAuth from './routes/RetailerRoutes/retailerAdminAuthRoute'
 import productionAdminAuth from './routes/ProductionRoutes/productionAdminAuthRoute'
 import cookieParser from 'cookie-parser';
-import { Server } from 'socket.io';
 import cors from 'cors'
 import session from 'express-session'
 import morgan from 'morgan';
@@ -16,6 +15,8 @@ import productionRoute from './routes/ProductionRoutes/productionRoute'
 import salesRoute from './routes/SalesRoutes/SalesRoutes'
 import conversationRoute from './routes/conversationRoute'
 import messageRoute from './routes/messagesRoute'
+import { SocketServer } from './socket/socket.io';
+
 
 dotenv.config()
 const app: Express = express();
@@ -41,12 +42,15 @@ app.use(
     })
   );
 app.use(errorHandlerMiddleware);
-// Example CORS middleware in Express
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:5173'); 
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-  });
+
+SocketServer(server);
+
+// // Example CORS middleware in Express
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', 'http://localhost:5173'); 
+//     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//     next();
+//   });
   
 
 
