@@ -17,8 +17,8 @@ export const addMessage = async (req: Request, res: Response)=>{
 
 export const getMessage = async (req: Request, res: Response) => {
 
-    console.log('coming here to get message');
-    console.log('query id converstionId',req.query);
+    // console.log('coming here to get message');
+    // console.log('query id converstionId',req.query);
  
     try {
        
@@ -30,12 +30,12 @@ export const getMessage = async (req: Request, res: Response) => {
             members: { $all: [senderId, recipientId] }
         });
 
-            console.log('conversation id---',conversation._id)
+            // console.log('conversation id---',conversation._id)
    
         const messages = await Messages.find({
             conversationId: conversation._id
         })    
-        console.log('messages of given conversation',messages);
+        // console.log('messages of given conversation----->',messages);
         res.status(200).json({success:true, messages, conversationId: conversation?._id})
     } catch (error) {
         console.log('error at getting messages', error);
