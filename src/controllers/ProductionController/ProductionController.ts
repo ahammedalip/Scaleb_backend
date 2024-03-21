@@ -65,7 +65,7 @@ export const fetchRequestedRetailers = async (req: Request, res: Response) => {
 
     try {
         const fetchUser = await productionAdmin.findById(id).populate('requestedRetailer');
-       
+
         const notBlockedRetailers: any = fetchUser?.requestedRetailer.filter(retailer => !retailer.isBlocked);
 
         if (notBlockedRetailers.length > 0) {
@@ -84,7 +84,7 @@ export const fetchRequestedRetailers = async (req: Request, res: Response) => {
 export const acceptReq = async (req: Request, res: Response) => {
     const id = req.id;
     const retailId = req.body.id
-    
+
 
     try {
         const verifyProduction = await productionAdmin.findById(id)
@@ -111,6 +111,13 @@ export const acceptReq = async (req: Request, res: Response) => {
         )
 
         if (checkConnectionProd || checkConnectionRet) {
+
+            await productionAdmin.findByIdAndUpdate(
+                id,
+                { $pull: { requestedRetailer: retailId } },
+                { new: true }
+            );
+
             return res.status(200).json({ success: true, message: 'already connected' })
         } else {
             const updateProd = await productionAdmin.findByIdAndUpdate(
@@ -123,12 +130,41 @@ export const acceptReq = async (req: Request, res: Response) => {
                 { $push: { connectedProduction: id } },
                 { new: true }
             )
+
+            await productionAdmin.findByIdAndUpdate(
+                id,
+                { $pull: { requestedRetailer: retailId } },
+                { new: true }
+            );
+
+
             return res.status(200).json({ success: true, message: 'User connected' })
         }
 
 
     } catch (error) {
         console.error('Error processing connection request:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
+export const rejectReq = async (req: Request, res: Response) => {
+    const id = req.id
+    const retailerId = req.query.id
+
+    console.log('profile id is========', retailerId)
+    try {
+        
+       const deleteReq =  await productionAdmin.findByIdAndUpdate(
+            id,
+            { $pull: { requestedRetailer: retailerId } },
+            { new: true }
+        );
+
+        res.status(200).json({success:true, message: 'Connection Request rejected'})
+
+    } catch (error) {
+        console.error('Error rejecting connection request:', error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 }
@@ -205,82 +241,118 @@ export const availableSales = async (req: Request, res: Response) => {
 
         const salesExecutive = await retailerSales.find({
             retailerAdminId: { $in: connectedRetailerId },
-            isBlocked:false
+            isBlocked: false
         })
-        return res.status(200).json({success:true, message: 'Sales executives list fetched successfully', salesExecutive})
+        return res.status(200).json({ success: true, message: 'Sales executives list fetched successfully', salesExecutive })
     } catch (error) {
         console.log('Error at fetching sales executives', error);
-        return res.status(500).json({success:false, message: 'Error at fetching sales executives'})
+        return res.status(500).json({ success: false, message: 'Error at fetching sales executives' })
     }
 }
 
 
-export const getSalesProfile = async (req:Request, res:Response) =>{
+export const getSalesProfile = async (req: Request, res: Response) => {
     const salesId = req.body.salesId
 
     try {
         const salesExecutive = await retailerSales.findById(salesId);
 
-        if(salesExecutive?.isBlocked){
-            return res.status(403).json({success:false, message: 'user is blocked'})
+        if (salesExecutive?.isBlocked) {
+            return res.status(403).json({ success: false, message: 'user is blocked' })
         }
-         res.status(200).json({success:true, salesExecutive})
+        res.status(200).json({ success: true, salesExecutive })
     } catch (error) {
         console.log('Error at fetching sales executives', error);
-        return res.status(500).json({success:false, message: 'Error at fetching sales executives'})
+        return res.status(500).json({ success: false, message: 'Error at fetching sales executives' })
     }
 }
 
 
-export const getConnRetailersList = async(req:Request, res: Response)=>{
-const id = req.query.id
-try {
-    const connectedRetailer =await productionAdmin.findById(id).populate('connectedRetailer')
-    const connected = connectedRetailer?.connectedRetailer
-    // console.log(connected);
-    res.status(200).json({success: true, message: 'fetched successfully', connected})
-} catch (error) {
-    console.log('Error while fetching connected retailers', error);
-    return res.status(500).json({success:false, message: 'Error at  while fetching connected retailers'})
-}
+export const getConnRetailersList = async (req: Request, res: Response) => {
+    const id = req.query.id
+    try {
+        const connectedRetailer = await productionAdmin.findById(id).populate('connectedRetailer')
+        const connected = connectedRetailer?.connectedRetailer
+        // console.log(connected);
+        res.status(200).json({ success: true, message: 'fetched successfully', connected })
+    } catch (error) {
+        console.log('Error while fetching connected retailers', error);
+        return res.status(500).json({ success: false, message: 'Error at  while fetching connected retailers' })
+    }
 }
 
-export const getAvailRetailList = async(req:Request, res: Response)=>{
+export const getAvailRetailList = async (req: Request, res: Response) => {
     const id = req.query.id
-    console.log('id for get avail req is ', id)
+    // console.log('id for get avail req is ', id)
     try {
         const production = await productionAdmin.findById(id);
 
-        const connectedRetailer = production?.connectedRetailer; 
+        const connectedRetailer = production?.connectedRetailer;
 
         const availableRetailer = await retailerAdmin.find({
             isBlocked: false,
             isVerified: true,
-            _id: { $nin: connectedRetailer } 
+            _id: { $nin: connectedRetailer }
         });
-        console.log( 'available retailer',availableRetailer)
+        console.log('available retailer', availableRetailer)
 
-        res.status(200).json({success:true, availableRetailer})
+        res.status(200).json({ success: true, availableRetailer })
     } catch (error) {
-    console.log('error while fetching available retailers', error)
-    res.status(500).json({success:false, message: 'Error while fetching available retailers'})
+        console.log('error while fetching available retailers', error)
+        res.status(500).json({ success: false, message: 'Error while fetching available retailers' })
     }
 }
 
 
-export const getRetailerProfile = async(req:Request, res:Response)=>{
-    const id= req.query.id
+export const getRetailerProfile = async (req: Request, res: Response) => {
+    const id = req.query.id
     try {
         const retailerProfile = await retailerAdmin.findById(id)
-        if(retailerProfile?.isBlocked){
-            return res.status(403).json({success:false, message: 'user is blocked'})
+        if (retailerProfile?.isBlocked) {
+            return res.status(403).json({ success: false, message: 'user is blocked' })
         }
 
 
-        res.status(200).json({success:true, retailerProfile, message: 'user profile fetched successfully'})
+        res.status(200).json({ success: true, retailerProfile, message: 'user profile fetched successfully' })
     } catch (error) {
         console.log('ERror while fetching retailer individual profile')
-        res.status(500).json({success:false, message: 'error while fetching details'})
+        res.status(500).json({ success: false, message: 'error while fetching details' })
     }
 }
 
+export const sendConnectionRequest = async (req: Request, res: Response) => {
+    // console.log('data from tne sgkdjkd body', req.body)
+    const productionId = req.body.productionId
+    const retailerId = req.body.retailId
+
+    try {
+        const validRetailer = await retailerAdmin.findById(retailerId)
+        if (validRetailer?.isBlocked || !validRetailer?.isVerified) {
+            return res.status(403).json({ success: false, message: 'user is blocked' })
+        }
+
+        const checkReq = await retailerAdmin.findOne({
+            $and: [
+                { _id: retailerId },
+                { requestedProduction: { $in: [productionId] } }
+            ]
+        })
+        if (checkReq) {
+            return res.status(200).json({ success: true, message: 'Already requested' })
+        } else {
+            // const addReqProd = await productionAdmin.findByIdAndUpdate(productionId, { $push: { requestedRetailer: retailerId } }, { new: true })
+            // console.log('add req production');
+            const addReqRet = await retailerAdmin.findByIdAndUpdate(retailerId, { $push: { requestedProduction: productionId } }, { new: true })
+
+            if (addReqRet ) {
+                return res.status(200).json({ success: true, message: 'Request send Successfully' });
+            } else {
+                return res.status(404).json({ success: false, message: 'Retailer not found' });
+            }
+        }
+    } catch (error) {
+        console.error('Error processing connection request:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+
+}
