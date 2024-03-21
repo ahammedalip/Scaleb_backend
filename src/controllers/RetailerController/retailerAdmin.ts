@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import retailerAdmin from "../../models/RetailerAdmin";
 import retailerSales from "../../models/RetailerSales";
 import productionAdmin from "../../models/ProductionAdmin";
+import order from "../../models/Order";
 
 interface CustomRequest extends Request {
     id: number,
@@ -175,12 +176,12 @@ export const avialableProd = async (req: Request, res: Response) => {
     try {
         const retailer = await retailerAdmin.findById(id);
 
-        const connectedProd = retailer?.connectedProduction; 
+        const connectedProd = retailer?.connectedProduction;
 
         const availableProduction = await productionAdmin.find({
             isBlocked: false,
             isVerified: true,
-            _id: { $nin: connectedProd } 
+            _id: { $nin: connectedProd }
         });
 
         // console.log(availableProduction);
@@ -238,7 +239,7 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
             // console.log('mongo update', addReqRet);
             const addReqProd = await productionAdmin.findByIdAndUpdate(prodId, { $push: { requestedRetailer: id } }, { new: true })
             // if (addReqRet && addReqProd) {
-                if(addReqProd){
+            if (addReqProd) {
                 return res.status(200).json({ success: true, message: 'requested' });
             } else {
                 return res.status(404).json({ success: false, message: 'Retailer not found' });
@@ -248,5 +249,20 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error processing connection request:', error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+
+export const getOrder = async (req: Request, res: Response) => {
+    const retailerId = req.query.id;
+    try {
+        
+        const orders = await order.find({ retailerId }).populate('salesExecId').populate('productionId')
+        console.log('orderssssssss==============',orders)
+
+        res.status(200).json({ success: true, orders });
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
