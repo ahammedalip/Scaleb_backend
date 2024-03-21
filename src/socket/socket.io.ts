@@ -38,7 +38,8 @@ export const SocketServer = (server: any) => {
             io.to(user?.socketId).emit('getMessage',{
                 senderId,
                 text,
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                receiverId
             })
             console.log('user array is', users)
             console.log('socket id of receiver',user?.socketId)
