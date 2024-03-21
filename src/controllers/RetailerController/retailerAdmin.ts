@@ -175,15 +175,15 @@ export const avialableProd = async (req: Request, res: Response) => {
     try {
         const retailer = await retailerAdmin.findById(id);
 
-        const connectedProd = retailer?.connectedProduction; // Correct variable name
+        const connectedProd = retailer?.connectedProduction; 
 
         const availableProduction = await productionAdmin.find({
             isBlocked: false,
             isVerified: true,
-            _id: { $nin: connectedProd } // Use the correct variable here
+            _id: { $nin: connectedProd } 
         });
 
-        console.log(availableProduction);
+        // console.log(availableProduction);
         return res.status(200).json({ success: true, message: 'fetched available production units', availableProduction })
 
 

@@ -230,3 +230,57 @@ export const getSalesProfile = async (req:Request, res:Response) =>{
         return res.status(500).json({success:false, message: 'Error at fetching sales executives'})
     }
 }
+
+
+export const getConnRetailersList = async(req:Request, res: Response)=>{
+const id = req.query.id
+try {
+    const connectedRetailer =await productionAdmin.findById(id).populate('connectedRetailer')
+    const connected = connectedRetailer?.connectedRetailer
+    // console.log(connected);
+    res.status(200).json({success: true, message: 'fetched successfully', connected})
+} catch (error) {
+    console.log('Error while fetching connected retailers', error);
+    return res.status(500).json({success:false, message: 'Error at  while fetching connected retailers'})
+}
+}
+
+export const getAvailRetailList = async(req:Request, res: Response)=>{
+    const id = req.query.id
+    console.log('id for get avail req is ', id)
+    try {
+        const production = await productionAdmin.findById(id);
+
+        const connectedRetailer = production?.connectedRetailer; 
+
+        const availableRetailer = await retailerAdmin.find({
+            isBlocked: false,
+            isVerified: true,
+            _id: { $nin: connectedRetailer } 
+        });
+        console.log( 'available retailer',availableRetailer)
+
+        res.status(200).json({success:true, availableRetailer})
+    } catch (error) {
+    console.log('error while fetching available retailers', error)
+    res.status(500).json({success:false, message: 'Error while fetching available retailers'})
+    }
+}
+
+
+export const getRetailerProfile = async(req:Request, res:Response)=>{
+    const id= req.query.id
+    try {
+        const retailerProfile = await retailerAdmin.findById(id)
+        if(retailerProfile?.isBlocked){
+            return res.status(403).json({success:false, message: 'user is blocked'})
+        }
+
+
+        res.status(200).json({success:true, retailerProfile, message: 'user profile fetched successfully'})
+    } catch (error) {
+        console.log('ERror while fetching retailer individual profile')
+        res.status(500).json({success:false, message: 'error while fetching details'})
+    }
+}
+
