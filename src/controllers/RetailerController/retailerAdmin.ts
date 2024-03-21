@@ -169,7 +169,7 @@ export const connectedProd = async (req: Request, res: Response) => {
 
 
 export const avialableProd = async (req: Request, res: Response) => {
-    console.log('coming here');
+    // console.log('coming here');
     const id = req.id
 
     try {
@@ -216,29 +216,29 @@ export const showProductionprofile = async (req: Request, res: Response) => {
 export const sendConnectionRequest = async (req: Request, res: Response) => {
     const id = req.id;
     const prodId = req.body.prodId;
-    console.log('id is', id);
-    console.log('prod id ', prodId);
 
     try {
         const validProduction = await productionAdmin.findById(prodId);
         if (validProduction?.isBlocked || !validProduction?.isVerified) {
             return res.status(403).json({ success: false, message: 'User is blocked' });
         }
-        const checkReq = await retailerAdmin.findOne(
+        const checkReq = await productionAdmin.findOne(
             {
                 $and: [
-                    { _id: id },
-                    { requestedProduction: { $in: [prodId] } }
+                    { _id: prodId },
+                    { requestedRetailer: { $in: [id] } }
                 ]
             }
         )
+        console.log('check if already requested', checkReq)
         if (checkReq) {
             return res.status(200).json({ success: true, message: 'already requested' })
         } else {
-            const addReqRet = await retailerAdmin.findByIdAndUpdate(id, { $push: { requestedProduction: prodId } }, { new: true });
-            console.log('mongo update', addReqRet);
+            // const addReqRet = await retailerAdmin.findByIdAndUpdate(id, { $push: { requestedProduction: prodId } }, { new: true });
+            // console.log('mongo update', addReqRet);
             const addReqProd = await productionAdmin.findByIdAndUpdate(prodId, { $push: { requestedRetailer: id } }, { new: true })
-            if (addReqRet && addReqProd) {
+            // if (addReqRet && addReqProd) {
+                if(addReqProd){
                 return res.status(200).json({ success: true, message: 'requested' });
             } else {
                 return res.status(404).json({ success: false, message: 'Retailer not found' });
