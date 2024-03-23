@@ -1,11 +1,13 @@
-import exp from "constants";
+// import exp from "constants";
 import { Request, Response } from "express";
+import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer';
 import retailerAdmin from "../../models/RetailerAdmin";
 import retailerSales from "../../models/RetailerSales";
 import productionAdmin from "../../models/ProductionAdmin";
 import order from "../../models/Order";
+import reviews from "../../models/Reviews";
 
 interface CustomRequest extends Request {
     id: number,
@@ -207,7 +209,33 @@ export const showProductionprofile = async (req: Request, res: Response) => {
         if (isvalidUser.isBlocked || !isvalidUser.isVerified) {
             return res.status(403).json({ success: false, message: 'User is blocked' })
         }
-        return res.status(200).json({ success: true, message: 'user details fetched successfully', userDetails: isvalidUser })
+           // Calculate the average rating
+           const averageRating = await reviews.aggregate([
+            {
+                $match: {
+                    'reviewee.id':  mongoose.Types.ObjectId.createFromHexString(id as string),
+                    'reviewee.type': 'productionUnit'
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    averageRating: { $avg: '$rating' }
+                }
+            }
+        ]);
+
+        console.log('adkfljaksdljfas', averageRating)
+
+       let averageToFive =0
+
+        if (averageRating.length > 0) {
+            averageToFive = Math.ceil((averageRating[0].averageRating / 2) * 2) / 2;
+        }
+
+        // console.log('adkfljaksdljfas', averageToFive)
+       
+        return res.status(200).json({ success: true, message: 'user details fetched successfully', userDetails: isvalidUser, rating:averageToFive })
     } catch (error) {
         console.log('error at showproductionprofile', error);
         return res.status(500).json({ success: false, message: 'error file fetching profile details' })

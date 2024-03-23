@@ -3,6 +3,8 @@ import productionAdmin from '../../models/ProductionAdmin';
 import retailerAdmin from '../../models/RetailerAdmin';
 import order from '../../models/Order';
 import retailerSales from '../../models/RetailerSales';
+import reviews from '../../models/Reviews';
+import mongoose from 'mongoose';
 
 interface CustomRequest extends Request {
     id: number,
@@ -154,14 +156,14 @@ export const rejectReq = async (req: Request, res: Response) => {
 
     console.log('profile id is========', retailerId)
     try {
-        
-       const deleteReq =  await productionAdmin.findByIdAndUpdate(
+
+        const deleteReq = await productionAdmin.findByIdAndUpdate(
             id,
             { $pull: { requestedRetailer: retailerId } },
             { new: true }
         );
 
-        res.status(200).json({success:true, message: 'Connection Request rejected'})
+        res.status(200).json({ success: true, message: 'Connection Request rejected' })
 
     } catch (error) {
         console.error('Error rejecting connection request:', error);
@@ -311,9 +313,33 @@ export const getRetailerProfile = async (req: Request, res: Response) => {
         if (retailerProfile?.isBlocked) {
             return res.status(403).json({ success: false, message: 'user is blocked' })
         }
+        // Calculate the average rating
+        const averageRating = await reviews.aggregate([
+            {
+                $match: {
+                    'reviewee.id': mongoose.Types.ObjectId.createFromHexString(id as string),
+                    'reviewee.type': 'retailer'
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    averageRating: { $avg: '$rating' }
+                }
+            }
+        ]);
 
+        // console.log('adkfljaksdljfas', averageRating)
 
-        res.status(200).json({ success: true, retailerProfile, message: 'user profile fetched successfully' })
+        let averageToFive = 0
+
+        if (averageRating.length > 0) {
+            averageToFive = Math.ceil((averageRating[0].averageRating / 2) * 2) / 2;
+        }
+
+        // console.log('average to 555', averageToFive)
+
+        res.status(200).json({ success: true, retailerProfile, message: 'user profile fetched successfully' , rating: averageToFive})
     } catch (error) {
         console.log('ERror while fetching retailer individual profile')
         res.status(500).json({ success: false, message: 'error while fetching details' })
@@ -344,7 +370,7 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
             // console.log('add req production');
             const addReqRet = await retailerAdmin.findByIdAndUpdate(retailerId, { $push: { requestedProduction: productionId } }, { new: true })
 
-            if (addReqRet ) {
+            if (addReqRet) {
                 return res.status(200).json({ success: true, message: 'Request send Successfully' });
             } else {
                 return res.status(404).json({ success: false, message: 'Retailer not found' });
