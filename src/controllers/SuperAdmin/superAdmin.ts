@@ -4,7 +4,6 @@ import { errorhandler } from "../../utils/errorhandler";
 import jwt from 'jsonwebtoken'
 import retailerAdmin from "../../models/RetailerAdmin";
 import productionAdmin from "../../models/ProductionAdmin";
-import { rmSync } from "fs";
 
 interface SuperAdmin {
     username: string;

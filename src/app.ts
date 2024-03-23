@@ -15,6 +15,7 @@ import productionRoute from './routes/ProductionRoutes/productionRoute'
 import salesRoute from './routes/SalesRoutes/SalesRoutes'
 import conversationRoute from './routes/conversationRoute'
 import messageRoute from './routes/messagesRoute'
+import reviewRoute from './routes/reviewRoute'
 import { SocketServer } from './socket/socket.io';
 
 
@@ -74,4 +75,5 @@ app.use('/production', productionRoute)
 app.use('/sales', salesRoute)
 app.use('/conversation',conversationRoute)
 app.use('/messages', messageRoute)
+app.use('/review', reviewRoute)
 

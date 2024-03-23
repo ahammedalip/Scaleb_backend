@@ -33,7 +33,7 @@ export const getMessage = async (req: Request, res: Response) => {
             // console.log('conversation id---',conversation._id)
    
         const messages = await Messages.find({
-            conversationId: conversation._id
+            conversationId: conversation?._id
         })    
         // console.log('messages of given conversation----->',messages);
         res.status(200).json({success:true, messages, conversationId: conversation?._id})
