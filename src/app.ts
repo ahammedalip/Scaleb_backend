@@ -16,13 +16,18 @@ import salesRoute from './routes/SalesRoutes/SalesRoutes'
 import conversationRoute from './routes/conversationRoute'
 import messageRoute from './routes/messagesRoute'
 import reviewRoute from './routes/reviewRoute'
+import stripeRoute from './routes/stripeRoute/stripeRoute'
 import { SocketServer } from './socket/socket.io';
+import Stripe from 'stripe'
 
 
 dotenv.config()
 const app: Express = express();
 const server = http.createServer(app); 
 const mongoURL: string = process.env.MONGO!
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
 
 app.use(express.json());
 app.use(cookieParser())
@@ -76,4 +81,5 @@ app.use('/sales', salesRoute)
 app.use('/conversation',conversationRoute)
 app.use('/messages', messageRoute)
 app.use('/review', reviewRoute)
+app.use('/stripe', stripeRoute)
 
