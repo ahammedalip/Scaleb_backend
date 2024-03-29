@@ -8,11 +8,22 @@ import retailerSales from "../../models/RetailerSales";
 import productionAdmin from "../../models/ProductionAdmin";
 import order from "../../models/Order";
 import reviews from "../../models/Reviews";
+import cron from 'node-cron'
 
 interface CustomRequest extends Request {
     id: number,
     role: string
 }
+
+// Schedule a job to run every day at 12 pm
+cron.schedule('0 12 * * *', async () => {
+    const currentDate = new Date();
+    await retailerAdmin.updateMany(
+        { 'subscribed.endDate': { $lt: currentDate } },
+        { $set: { 'subscribed.$.active': false } }
+    );
+    console.log('Subscription status updated.');
+});
 
 
 export const addSalesExecutive = async (req: Request, res: Response) => {
@@ -294,3 +305,36 @@ export const getOrder = async (req: Request, res: Response) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+
+
+export const addSubscription = async (req: Request, res: Response) => {
+    console.log('retailer');
+    const { time, id } = req.query
+    const currentDate = new Date();
+    let endDate = new Date(currentDate);
+
+    if (time === 'six') {
+        endDate.setDate(currentDate.getDate() + 180); // 180 days from now
+    } else if (time === 'one') {
+        endDate.setDate(currentDate.getDate() + 365); // 365 days from now
+    }
+    try {
+        const subscription = await retailerAdmin.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    subscribed: {
+                        endDate: endDate,
+                        active: true
+                    }
+                }
+            }, { new: true }
+    
+        )
+        res.status(200).json({ success: true , subscription})
+    } catch (error) {
+        console.log('error while updating subscription')
+        res.status(500)
+    }
+    
+}

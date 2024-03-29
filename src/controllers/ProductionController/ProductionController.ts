@@ -5,12 +5,22 @@ import order from '../../models/Order';
 import retailerSales from '../../models/RetailerSales';
 import reviews from '../../models/Reviews';
 import mongoose from 'mongoose';
+import cron from 'node-cron';
 
 interface CustomRequest extends Request {
     id: number,
     role: string
 }
 
+// Schedule a job to run every day at 12 pm
+cron.schedule('0 12 * * *', async () => {
+    const currentDate = new Date();
+    await productionAdmin.updateMany(
+        { 'subscribed.endDate': { $lt: currentDate } },
+        { $set: { 'subscribed.$.active': false } }
+    );
+    console.log('Subscription status updated.');
+});
 
 
 export const getProfile = async (req: Request, res: Response) => {
@@ -339,7 +349,7 @@ export const getRetailerProfile = async (req: Request, res: Response) => {
 
         // console.log('average to 555', averageToFive)
 
-        res.status(200).json({ success: true, retailerProfile, message: 'user profile fetched successfully' , rating: averageToFive})
+        res.status(200).json({ success: true, retailerProfile, message: 'user profile fetched successfully', rating: averageToFive })
     } catch (error) {
         console.log('ERror while fetching retailer individual profile')
         res.status(500).json({ success: false, message: 'error while fetching details' })
@@ -381,4 +391,36 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 
+}
+
+export const addSubscription = async (req: Request, res: Response) => {
+    const { time, id } = req.query
+    const currentDate = new Date();
+    let endDate = new Date(currentDate);
+
+    if (time === 'six') {
+        endDate.setDate(currentDate.getDate() + 180); // 180 days from now
+    } else if (time === 'one') {
+        endDate.setDate(currentDate.getDate() + 365); // 365 days from now
+    }
+
+    try {
+        const subscription = await productionAdmin.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    subscribed: {
+                        endDate: endDate,
+                        active: true
+                    }
+                }
+            }, { new: true }
+    
+        )
+        res.status(200).json({ success: true , subscription})
+    } catch (error) {
+        console.log('error while updating subscription')
+        res.status(500)
+    }
+   
 }
