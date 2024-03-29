@@ -1,5 +1,10 @@
 import mongoose, { Document, Schema, model } from "mongoose";
 
+interface Subscription{
+    endDate :Date,
+    active: boolean,
+}
+
 interface UserInterface extends Document{
     retailerName: string,
     email : string,
@@ -12,6 +17,7 @@ interface UserInterface extends Document{
     connectedProduction:mongoose.Schema.Types.ObjectId[],
     requestedProduction: mongoose.Schema.Types.ObjectId[],
     recievedProduction: mongoose.Schema.Types.ObjectId[],
+    subscribed: Subscription
 }
 
 const userSchema = new Schema<UserInterface>({
@@ -59,6 +65,14 @@ const userSchema = new Schema<UserInterface>({
         type:mongoose.Schema.Types.ObjectId,
         ref: 'ProductionAdmin'
     }],
+    subscribed:{
+        endDate:{
+            type:Date,
+        },
+        active:{
+            type:Boolean,
+        }
+    }
 
 })
 

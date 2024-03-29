@@ -13,6 +13,12 @@ interface UserInterface extends Document {
     requestedRetailer: mongoose.Schema.Types.ObjectId[],
     connectedRetailer: mongoose.Schema.Types.ObjectId[],
     recievedRetailer : mongoose.Schema.Types.ObjectId[],
+    subscribed: Subscription
+}
+
+interface Subscription {
+    endDate: Date;
+    active: boolean;
 }
 
 const userSchema = new Schema<UserInterface>({
@@ -61,8 +67,15 @@ const userSchema = new Schema<UserInterface>({
     recievedRetailer:[{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'RetailerAdmin'
-    }]
-
+    }],
+    subscribed: {
+        endDate: {
+            type: Date,
+        },
+        active: {
+            type: Boolean,
+        }
+    }
 })
 
 const productionAdmin = model<UserInterface>('ProductionAdmin', userSchema)
