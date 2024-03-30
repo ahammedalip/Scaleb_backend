@@ -19,6 +19,7 @@ interface UserInterface extends Document {
 interface Subscription {
     endDate: Date;
     active: boolean;
+    duration:string
 }
 
 const userSchema = new Schema<UserInterface>({
@@ -74,6 +75,9 @@ const userSchema = new Schema<UserInterface>({
         },
         active: {
             type: Boolean,
+        },
+        duration:{
+            type:String,
         }
     }
 })

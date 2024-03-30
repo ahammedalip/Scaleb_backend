@@ -3,6 +3,7 @@ import mongoose, { Document, Schema, model } from "mongoose";
 interface Subscription{
     endDate :Date,
     active: boolean,
+    duration: string,
 }
 
 interface UserInterface extends Document{
@@ -71,6 +72,9 @@ const userSchema = new Schema<UserInterface>({
         },
         active:{
             type:Boolean,
+        },
+        duration:{
+            type:String,
         }
     }
 
