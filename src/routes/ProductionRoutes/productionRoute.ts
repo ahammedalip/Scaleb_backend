@@ -1,8 +1,9 @@
 import express from 'express'
 import { verifyProduction } from '../../utils/verifyUser';
-import { acceptOrder, acceptReq, addItem, addSubscription, availableSales, fetchOrders, fetchRequestedRetailers, 
+import {  acceptReq, addItem, addSubscription, availableSales, fetchRequestedRetailers, 
     getAvailRetailList, getConnRetailersList, getProfile, getRetailerProfile, getSalesProfile, 
-    rejectOrder, rejectReq, sendConnectionRequest } from '../../controllers/ProductionController/ProductionController';
+     rejectReq, sendConnectionRequest } from '../../controllers/ProductionController/ProductionController';
+import { acceptOrder, fetchOrdersAll, rejectOrder } from '../../controllers/ProductionController/fetchOrder';
 
 
 
@@ -15,7 +16,8 @@ router.post('/addItem', verifyProduction, addItem)
 router.get('/requests', verifyProduction, fetchRequestedRetailers)
 router.delete('/delete-req', verifyProduction, rejectReq)
 router.post('/acc-req', verifyProduction, acceptReq)
-router.get('/orders', verifyProduction,fetchOrders)
+// router.get('/orders', verifyProduction,fetchOrders)
+router.get('/orders', verifyProduction,fetchOrdersAll)
 router.patch('/order-acc', verifyProduction,acceptOrder)
 router.patch('/order-rej', verifyProduction,rejectOrder)
 router.get('/available-sales', verifyProduction,availableSales)
