@@ -397,10 +397,12 @@ export const addSubscription = async (req: Request, res: Response) => {
     const { time, id } = req.query
     const currentDate = new Date();
     let endDate = new Date(currentDate);
-
+let duration =''
     if (time === 'six') {
+        duration = 'six'
         endDate.setDate(currentDate.getDate() + 180); // 180 days from now
     } else if (time === 'one') {
+        duration='one'
         endDate.setDate(currentDate.getDate() + 365); // 365 days from now
     }
 
@@ -411,7 +413,8 @@ export const addSubscription = async (req: Request, res: Response) => {
                 $set: {
                     subscribed: {
                         endDate: endDate,
-                        active: true
+                        active: true,
+                        duration
                     }
                 }
             }, { new: true }

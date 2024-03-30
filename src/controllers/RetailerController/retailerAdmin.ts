@@ -220,11 +220,11 @@ export const showProductionprofile = async (req: Request, res: Response) => {
         if (isvalidUser.isBlocked || !isvalidUser.isVerified) {
             return res.status(403).json({ success: false, message: 'User is blocked' })
         }
-           // Calculate the average rating
-           const averageRating = await reviews.aggregate([
+        // Calculate the average rating
+        const averageRating = await reviews.aggregate([
             {
                 $match: {
-                    'reviewee.id':  mongoose.Types.ObjectId.createFromHexString(id as string),
+                    'reviewee.id': mongoose.Types.ObjectId.createFromHexString(id as string),
                     'reviewee.type': 'productionUnit'
                 }
             },
@@ -238,15 +238,15 @@ export const showProductionprofile = async (req: Request, res: Response) => {
 
         console.log('adkfljaksdljfas', averageRating)
 
-       let averageToFive =0
+        let averageToFive = 0
 
         if (averageRating.length > 0) {
             averageToFive = Math.ceil((averageRating[0].averageRating / 2) * 2) / 2;
         }
 
         // console.log('adkfljaksdljfas', averageToFive)
-       
-        return res.status(200).json({ success: true, message: 'user details fetched successfully', userDetails: isvalidUser, rating:averageToFive })
+
+        return res.status(200).json({ success: true, message: 'user details fetched successfully', userDetails: isvalidUser, rating: averageToFive })
     } catch (error) {
         console.log('error at showproductionprofile', error);
         return res.status(500).json({ success: false, message: 'error file fetching profile details' })
@@ -295,9 +295,9 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
 export const getOrder = async (req: Request, res: Response) => {
     const retailerId = req.query.id;
     try {
-        
+
         const orders = await order.find({ retailerId }).populate('salesExecId').populate('productionId')
-        console.log('orderssssssss==============',orders)
+        console.log('orderssssssss==============', orders)
 
         res.status(200).json({ success: true, orders });
     } catch (error) {
@@ -312,10 +312,12 @@ export const addSubscription = async (req: Request, res: Response) => {
     const { time, id } = req.query
     const currentDate = new Date();
     let endDate = new Date(currentDate);
-
+    let duration
     if (time === 'six') {
+        duration = 'six'
         endDate.setDate(currentDate.getDate() + 180); // 180 days from now
     } else if (time === 'one') {
+        duration = 'one'
         endDate.setDate(currentDate.getDate() + 365); // 365 days from now
     }
     try {
@@ -325,16 +327,17 @@ export const addSubscription = async (req: Request, res: Response) => {
                 $set: {
                     subscribed: {
                         endDate: endDate,
-                        active: true
+                        active: true,
+                        duration
                     }
                 }
             }, { new: true }
-    
+
         )
-        res.status(200).json({ success: true , subscription})
+        res.status(200).json({ success: true, subscription })
     } catch (error) {
         console.log('error while updating subscription')
         res.status(500)
     }
-    
+
 }
