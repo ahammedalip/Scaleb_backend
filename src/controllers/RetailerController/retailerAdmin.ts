@@ -236,7 +236,6 @@ export const showProductionprofile = async (req: Request, res: Response) => {
             }
         ]);
 
-        console.log('adkfljaksdljfas', averageRating)
 
         let averageToFive = 0
 
@@ -256,8 +255,14 @@ export const showProductionprofile = async (req: Request, res: Response) => {
 export const sendConnectionRequest = async (req: Request, res: Response) => {
     const id = req.id;
     const prodId = req.body.prodId;
-
     try {
+        const verifyRetailerSubscription = await retailerAdmin.findById(id)
+        if(verifyRetailerSubscription?.subscribed.active == undefined || verifyRetailerSubscription?.subscribed.active== false){
+            if (verifyRetailerSubscription?.connectedProduction && verifyRetailerSubscription.connectedProduction.length >= 1) {
+                // Return or perform your desired action here
+                return res.status(200).json({success: false, message: 'not_subscribed'})
+            }
+        }
         const validProduction = await productionAdmin.findById(prodId);
         if (validProduction?.isBlocked || !validProduction?.isVerified) {
             return res.status(403).json({ success: false, message: 'User is blocked' });
@@ -270,7 +275,7 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
                 ]
             }
         )
-        console.log('check if already requested', checkReq)
+        // console.log('check if already requested', checkReq)
         if (checkReq) {
             return res.status(200).json({ success: true, message: 'already requested' })
         } else {
