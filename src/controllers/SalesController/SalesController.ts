@@ -171,3 +171,22 @@ export const productionProfile = async (req: Request, res: Response) => {
         res.status(500).json({ success: false, message: 'error while fetching production' })
     }
 }
+
+
+export const checkSubscription = async (req: Request, res: Response) => {
+    const id = req.query.id
+    try {
+        const verifySales = await retailerSales.findById(id)
+        if (verifySales) {
+            const salesAdmin = verifySales.retailerAdminId
+
+            const verifyAdmin = await retailerAdmin.findById(salesAdmin)
+            // console.log('sales admin', verifyAdmin);
+
+            return res.status(200).json({ success: true, admin: verifyAdmin?.subscribed })
+        }
+    } catch (error) {
+        console.log('error while checking for subscription', error)
+        res.status(500)
+    }
+}
