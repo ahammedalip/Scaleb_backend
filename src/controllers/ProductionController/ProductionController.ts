@@ -27,7 +27,7 @@ export const getProfile = async (req: Request, res: Response) => {
 
     const userRole = req.role;
     const userId = req.id;
-
+    const id = req.query.id
     try {
         const verifyUser = await productionAdmin.findById(userId)
         if (!verifyUser) {
@@ -300,6 +300,14 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
     const retailerId = req.body.retailId
 
     try {
+        const verifyProductionSubscription = await productionAdmin.findById(productionId)
+        if(verifyProductionSubscription?.subscribed.active == undefined || verifyProductionSubscription?.subscribed.active == false ){
+            if(verifyProductionSubscription?.connectedRetailer && verifyProductionSubscription.connectedRetailer.length>=1){
+                console.log('the array is greater than 1 and is not premium also so returning')
+                return res.status(200).json({success:false, message: 'not_subscribed'})
+            }
+        }
+
         const validRetailer = await retailerAdmin.findById(retailerId)
         if (validRetailer?.isBlocked || !validRetailer?.isVerified) {
             return res.status(403).json({ success: false, message: 'user is blocked' })
@@ -335,12 +343,12 @@ export const addSubscription = async (req: Request, res: Response) => {
     const { time, id } = req.query
     const currentDate = new Date();
     let endDate = new Date(currentDate);
-let duration =''
+    let duration = ''
     if (time === 'six') {
         duration = 'six'
         endDate.setDate(currentDate.getDate() + 180); // 180 days from now
     } else if (time === 'one') {
-        duration='one'
+        duration = 'one'
         endDate.setDate(currentDate.getDate() + 365); // 365 days from now
     }
 
@@ -356,12 +364,12 @@ let duration =''
                     }
                 }
             }, { new: true }
-    
+
         )
-        res.status(200).json({ success: true , subscription})
+        res.status(200).json({ success: true, subscription })
     } catch (error) {
         console.log('error while updating subscription')
         res.status(500)
     }
-   
+
 }

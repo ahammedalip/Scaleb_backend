@@ -32,19 +32,21 @@ export const SocketServer = (server: any) => {
         })
 
         // send and get message
-        socket.on('sendMessage',({senderId, receiverId, text}) =>{
+        socket.on('sendMessage',({senderId, receiverId, text,imageUrl}) =>{
             const user= getUser(receiverId)
             console.log('chat from sendmessage is',text,'----sender',senderId, '--reciever--',receiverId)
             io.to(user?.socketId).emit('getMessage',{
                 senderId,
                 text,
                 createdAt: new Date().toISOString(),
-                receiverId
+                receiverId,
+                imageUrl
             })
             console.log('user array is', users)
             console.log('socket id of receiver',user?.socketId)
             console.log('socket id of sender------>',senderId);
             console.log('text or message=====', text);
+            console.log('imge url',imageUrl);
         })
  
         // when disconnected
