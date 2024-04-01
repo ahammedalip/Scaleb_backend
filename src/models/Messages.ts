@@ -4,7 +4,7 @@ interface Message extends Document {
    conversationId: string;
    sender: string;
    text: string;
-
+   imageUrl:string;
 }
 
 const messageSchema = new Schema<Message>({
@@ -16,6 +16,9 @@ const messageSchema = new Schema<Message>({
    },
    text:{
       type: String
+   },
+   imageUrl:{
+      type:String
    }
 },
 {timestamps: true})
