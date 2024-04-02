@@ -233,20 +233,30 @@ export const getConnRetailersList = async (req: Request, res: Response) => {
 
 export const getAvailRetailList = async (req: Request, res: Response) => {
     const id = req.query.id
-    // console.log('id for get avail req is ', id)
+    const pageSize: number = 6;
     try {
+        const { page = 1 } = req.query as { page?: number }
+
         const production = await productionAdmin.findById(id);
 
         const connectedRetailer = production?.connectedRetailer;
+        const availableRetailerCount = await retailerAdmin.countDocuments({
+            isBlocked:false,
+            isVerified: true,
+            _id: {$nin : connectedRetailer}
+        })
+        const totalPages = Math.ceil(availableRetailerCount / pageSize)
 
+        // console.log('count of available retailers list,--------',availableRetailerCount)
         const availableRetailer = await retailerAdmin.find({
             isBlocked: false,
             isVerified: true,
             _id: { $nin: connectedRetailer }
-        });
-        console.log('available retailer', availableRetailer)
+        }).skip((page-1)*pageSize)
+        .limit(Number(pageSize));
+        // console.log('available retailer', availableRetailer)
 
-        res.status(200).json({ success: true, availableRetailer })
+        res.status(200).json({ success: true, availableRetailer, availableRetailerCount, totalPages })
     } catch (error) {
         console.log('error while fetching available retailers', error)
         res.status(500).json({ success: false, message: 'Error while fetching available retailers' })
@@ -301,10 +311,10 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
 
     try {
         const verifyProductionSubscription = await productionAdmin.findById(productionId)
-        if(verifyProductionSubscription?.subscribed.active == undefined || verifyProductionSubscription?.subscribed.active == false ){
-            if(verifyProductionSubscription?.connectedRetailer && verifyProductionSubscription.connectedRetailer.length>=1){
+        if (verifyProductionSubscription?.subscribed.active == undefined || verifyProductionSubscription?.subscribed.active == false) {
+            if (verifyProductionSubscription?.connectedRetailer && verifyProductionSubscription.connectedRetailer.length >= 1) {
                 console.log('the array is greater than 1 and is not premium also so returning')
-                return res.status(200).json({success:false, message: 'not_subscribed'})
+                return res.status(200).json({ success: false, message: 'not_subscribed' })
             }
         }
 
