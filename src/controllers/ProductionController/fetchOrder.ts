@@ -20,7 +20,7 @@ export const fetchOrdersAll = async (req: Request, res: Response) => {
             const { page = 1 } = req.query as { page?: number }
             const totalOrders = await order.countDocuments({
                 productionId: id,
-                accepted: "No"
+                updateRequest: 'Requested'
 
             })
             const totalpages = Math.ceil(totalOrders / pageSize)
