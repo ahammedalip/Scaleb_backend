@@ -13,18 +13,23 @@ import { Document, Model, model, Schema, Types } from 'mongoose';
 
 export const getAvailableProduction = async (req: Request, res: Response) => {
     const id = req.id;
-
+    const pageSize: number = 6
     try {
+        const { page = 1 } = req.query as { page?: number }
         const findAdmin = await retailerSales.findById(id)
         // console.log(findAdmin?.retailerAdminId);
         const adminId = findAdmin?.retailerAdminId;
+
+
 
         const findProd = await retailerAdmin.findOne(
             { _id: adminId }
         ).populate('connectedProduction'); // Specify the path to populate
 
         const connected = findProd?.connectedProduction
-
+        const totalProd = connected?.length
+    
+        
         return res.status(200).json({ success: true, message: 'user list fetched successfully', availableProduction: connected })
 
     } catch (error) {
@@ -92,14 +97,24 @@ export const createOrder = async (req: Request, res: Response) => {
 export const fetchOrder = async (req: Request, res: Response) => {
 
     const id = req.id
+    const pageSize: number = 2;
     try {
+        const { page = 1 } = req.query as { page?: number }
+
+        const totalOrders = await order.countDocuments({
+            salesExecId: id
+        })
+        const totalPages = Math.ceil(totalOrders / pageSize)
         const getOrder = await order.find({
             salesExecId: id
-        }).populate('productionId')
+        }).skip((page - 1) * pageSize)
+            .limit(Number(pageSize))
+            .populate('productionId')
         // console.log('orders are', getOrder);
+        console.log('pagesixe', pageSize, 'totalpages', totalPages);
 
 
-        res.status(200).json({ success: true, message: 'order fetched successfully', orders: getOrder })
+        res.status(200).json({ success: true, message: 'order fetched successfully', orders: getOrder, totalOrders, totalPages })
 
     } catch (error) {
         console.log('error at fetching order of sales executive', error);
