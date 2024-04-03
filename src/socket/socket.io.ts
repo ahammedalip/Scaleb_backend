@@ -28,7 +28,7 @@ export const SocketServer = (server: any) => {
         //add user to the array
         socket.on('addUser', (userId) => {
             addUser(userId, socket.id)
-            io.emit('getUsers', users)
+            io.emit('onlineUsers', users)
         })
 
         // send and get message
