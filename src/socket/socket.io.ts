@@ -48,6 +48,17 @@ export const SocketServer = (server: any) => {
             console.log('text or message=====', text);
             console.log('imge url',imageUrl);
         })
+
+        socket.on('typing',({senderId, receiverId})=>{
+            console.log('sender id ',senderId, 'reciever id', receiverId)
+            const user = getUser(receiverId)
+            console.log('user is ===',user)
+
+            io.to(user?.socketId).emit('statusTyping',{
+                senderId
+            })
+
+        })
  
         // when disconnected
         socket.on("disconnect", () => {
