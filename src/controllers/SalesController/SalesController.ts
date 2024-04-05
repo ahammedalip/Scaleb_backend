@@ -5,6 +5,8 @@ import exp from "constants";
 import productionAdmin from "../../models/ProductionAdmin";
 import order from "../../models/Order";
 import { Document, Model, model, Schema, Types } from 'mongoose';
+import reviews from "../../models/Reviews";
+import mongoose from 'mongoose';
 
 // view sales executive
 
@@ -48,7 +50,30 @@ export const viewIndividualprofile = async (req: Request, res: Response) => {
         if (production?.isBlocked || !production?.isVerified) {
             return res.status(401).json({ success: false, message: 'User is blocked' })
         }
-        return res.status(200).json({ success: true, message: 'user profile fetched successfully', userDetails: production })
+        // Calculate the average rating
+        const averageRating = await reviews.aggregate([
+            {
+                $match: {
+                    'reviewee.id': mongoose.Types.ObjectId.createFromHexString(productionId as string),
+                    'reviewee.type': 'productionUnit'
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    averageRating: { $avg: '$rating' }
+                }
+            }
+        ]);
+
+
+        let averageToFive = 0
+
+        if (averageRating.length > 0) {
+            averageToFive = Math.ceil((averageRating[0].averageRating / 2) * 2) / 2;
+        }
+        console.log('rating is -=-=-=-',averageToFive)
+        return res.status(200).json({ success: true, message: 'user profile fetched successfully', userDetails: production, rating:averageToFive })
     } catch (error) {
         console.log('error at fetching individual profile', error);
         res.status(500).json({ success: false, message: 'error while user profile fetching' })
