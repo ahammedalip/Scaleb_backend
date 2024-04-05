@@ -34,31 +34,35 @@ export const SocketServer = (server: any) => {
         // send and get message
         socket.on('sendMessage',({senderId, receiverId, text,imageUrl}) =>{
             const user= getUser(receiverId)
-            console.log('chat from sendmessage is',text,'----sender',senderId, '--reciever--',receiverId)
-            io.to(user?.socketId).emit('getMessage',{
+            // console.log('chat from sendmessage is',text,'----sender',senderId, '--reciever--',receiverId)
+          if(user && user.socketId){
+            io.to(user.socketId).emit('getMessage',{
                 senderId,
                 text,
                 createdAt: new Date().toISOString(),
                 receiverId,
                 imageUrl
             })
-            console.log('user array is', users)
-            console.log('socket id of receiver',user?.socketId)
-            console.log('socket id of sender------>',senderId);
-            console.log('text or message=====', text);
-            console.log('imge url',imageUrl);
+          }else{
+            console.log('user is not found')
+          }
         })
 
-        socket.on('typing',({senderId, receiverId})=>{
-            console.log('sender id ',senderId, 'reciever id', receiverId)
-            const user = getUser(receiverId)
-            console.log('user is ===',user)
-
-            io.to(user?.socketId).emit('statusTyping',{
-                senderId
-            })
-
-        })
+        socket.on('typing', ({ senderId, receiverId }) => {
+            // console.log('sender id ', senderId, 'reciever id', receiverId);
+            const user = getUser(receiverId);
+            // console.log('user is ===', user);
+        
+            if (user && user.socketId) {
+                io.to(user.socketId).emit('statusTyping', {
+                    senderId
+                });
+            } else {
+                console.error('User or socketId not found');
+               
+            }
+        });
+        
  
         // when disconnected
         socket.on("disconnect", () => {
