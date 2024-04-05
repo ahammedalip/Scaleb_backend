@@ -2,7 +2,8 @@ import express from 'express'
 import { verifyProduction } from '../../utils/verifyUser';
 import {  acceptReq, addItem, addSubscription, availableSales, fetchRequestedRetailers, 
     getAvailRetailList, getConnRetailersList, getProfile, getRetailerProfile, getSalesProfile, 
-     rejectReq, sendConnectionRequest } from '../../controllers/ProductionController/ProductionController';
+     rejectReq, searchRetailer, sendConnectionRequest, 
+     sortRetailer} from '../../controllers/ProductionController/ProductionController';
 import { acceptOrder, fetchOrdersAll, rejectOrder } from '../../controllers/ProductionController/fetchOrder';
 
 
@@ -26,6 +27,8 @@ router.get('/avail-ret', verifyProduction, getAvailRetailList)
 router.get('/ret-profile', verifyProduction,getRetailerProfile)
 router.patch('/conn-req', verifyProduction, sendConnectionRequest)
 router.patch('/subscription', verifyProduction,addSubscription)
+router.get('/search-user', verifyProduction,searchRetailer)
+router.get('/retailer-sort', verifyProduction, sortRetailer)
 
 
 export default router;
