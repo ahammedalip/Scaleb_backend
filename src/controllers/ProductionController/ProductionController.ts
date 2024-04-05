@@ -241,9 +241,9 @@ export const getAvailRetailList = async (req: Request, res: Response) => {
 
         const connectedRetailer = production?.connectedRetailer;
         const availableRetailerCount = await retailerAdmin.countDocuments({
-            isBlocked:false,
+            isBlocked: false,
             isVerified: true,
-            _id: {$nin : connectedRetailer}
+            _id: { $nin: connectedRetailer }
         })
         const totalPages = Math.ceil(availableRetailerCount / pageSize)
 
@@ -252,8 +252,8 @@ export const getAvailRetailList = async (req: Request, res: Response) => {
             isBlocked: false,
             isVerified: true,
             _id: { $nin: connectedRetailer }
-        }).skip((page-1)*pageSize)
-        .limit(Number(pageSize));
+        }).skip((page - 1) * pageSize)
+            .limit(Number(pageSize));
         // console.log('available retailer', availableRetailer)
 
         res.status(200).json({ success: true, availableRetailer, availableRetailerCount, totalPages })
@@ -382,4 +382,75 @@ export const addSubscription = async (req: Request, res: Response) => {
         res.status(500)
     }
 
+}
+
+export const searchRetailer = async (req: Request, res: Response) => {
+
+    const searchVal = req.query.value
+    if (typeof searchVal !== 'string') {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid search value",
+        });
+    }
+
+    try {
+        const searchPattern = new RegExp(searchVal, 'i');
+
+        // Use the $regex operator to find retailers whose name matches the pattern
+        const searchRetailer = await retailerAdmin.find({
+            retailerName: { $regex: searchPattern },
+            isBlocked: false,
+            isVerified: true
+        });
+
+        if (searchRetailer.length > 0) {
+            res.status(200).json({
+                success: true,
+                message: "Retailers found",
+                retailers: searchRetailer
+            });
+        } else {
+            res.status(200).json({
+                success: true,
+                message: "No retailers found matching the search criteria",
+                retailers: []
+            });
+        }
+    } catch (error) {
+        console.log('error while searching data', error)
+        res.status(500)
+    }
+}
+
+export const sortRetailer = async (req: Request, res: Response) => {
+    const value = req.query.value
+    console.log('sort value', value)
+    try {
+        const sortOrder = value === '1' ? 1 : -1;
+        const aggregationPipeline = [
+            {
+                $group: {
+                    _id: '$reviewee.id', // Group by retailer id
+                    averageRating: { $avg: '$rating' } // Calculate average rating
+                }
+            },
+            {
+                $sort: { averageRating: sortOrder } // Sort by average rating
+            }
+        ];
+
+        const retailerRatings = await reviews.aggregate(aggregationPipeline);
+        for (const rating of retailerRatings) {
+            await retailerAdmin.updateOne({ _id: rating._id }, { averageRating: rating.averageRating });
+        }
+
+        const sortedRetailers = await retailerAdmin.find({isBlocked:false, isVerified:true}).sort({ averageRating: sortOrder });
+
+        console.log('sorted retailers', sortedRetailers);
+        res.status(200).json({ sortedRetailers, success:true })
+    } catch (error) {
+        console.log('error while sorting', error);
+        res.status(500)
+    }
 }
