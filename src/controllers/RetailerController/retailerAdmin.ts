@@ -301,11 +301,12 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
 export const getOrder = async (req: Request, res: Response) => {
     const retailerId = req.query.id;
     try {
+        const countOrder = await order.countDocuments()
 
         const orders = await order.find({ retailerId }).populate('salesExecId').populate('productionId')
         console.log('orderssssssss==============', orders)
 
-        res.status(200).json({ success: true, orders });
+        res.status(200).json({ success: true, orders, countOrder });
     } catch (error) {
         console.error('Error fetching orders:', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
@@ -350,14 +351,14 @@ export const addSubscription = async (req: Request, res: Response) => {
         const newPayment = new payment({
             userId: id,
             amount: paidAmount,
-            role: 'production',
+            role: 'RetailerAdmin',
             period: time
 
         })
         await newPayment.save()
         res.status(200).json({ success: true, subscription })
     } catch (error) {
-        console.log('error while updating subscription')
+        console.log('error while updating subscription',error)
         res.status(500)
     }
 
