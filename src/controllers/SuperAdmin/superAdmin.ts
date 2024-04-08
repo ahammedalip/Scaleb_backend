@@ -99,12 +99,12 @@ export const blockUser = async (req: Request, res: Response) => {
                 return res.status(500).json({ success: false, message: 'Error while blocking' })
             }
             const productionList = await productionAdmin.find({ isVerified: true })
-            return res.status(200).json({ success: true, message: 'User blocked successfully', userlist:productionList})
+            return res.status(200).json({ success: true, message: 'User blocked successfully', userlist: productionList })
         } catch (error) {
             console.log('error at block production or retailer user -->', error);
             res.status(500).json({ success: true, message: 'Error at Blocking user' })
         }
-    }else if(role == 'retailer'){
+    } else if (role == 'retailer') {
         try {
             const validUser = await retailerAdmin.findById(id)
             if (!validUser) {
@@ -119,7 +119,7 @@ export const blockUser = async (req: Request, res: Response) => {
                 return res.status(500).json({ success: false, message: 'Error while blocking' })
             }
             const productionList = await retailerAdmin.find({ isVerified: true })
-            return res.status(200).json({ success: true, message: 'User blocked successfully', userlist:productionList})
+            return res.status(200).json({ success: true, message: 'User blocked successfully', userlist: productionList })
         } catch (error) {
             console.log('error at block production or retailer user -->', error);
             res.status(500).json({ success: true, message: 'Error at Blocking user' })
@@ -127,12 +127,32 @@ export const blockUser = async (req: Request, res: Response) => {
     }
 }
 
-export const getRevenue = async(req:Request, res:Response)=>{
-    console.log('jiiii')
+export const getRevenue = async (req: Request, res: Response) => {
+    const pageSize: number = 10;
     try {
-        const getRevenue = await payment.find().populate('')
-        console.log('get revenue', getRevenue)
-        res.status(200).json({success:true, revenueList:getRevenue})
+        const { page = 1 } = req.query as { page?: number }
+
+        const totalPaymentDoc = await payment.countDocuments()
+
+        const totalPages = Math.ceil(totalPaymentDoc/pageSize)
+
+        const getRevenue = await payment.find()
+        .skip((page-1)*pageSize)
+        .limit(Number(pageSize))
+        .populate('userId')
+        // console.log('get revenue', getRevenue)
+
+        const totalPayment = await payment.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: '$amount' }
+                }
+            }
+        ])
+        const totalAmount = totalPayment[0].totalAmount
+        // console.log('total amount', totalPayment[0].totalAmount)
+        res.status(200).json({ success: true, revenueList: getRevenue, totalAmount, totalPaymentDoc, totalPages })
     } catch (error) {
         console.log('error at get revenue', error)
         res.status(500)
