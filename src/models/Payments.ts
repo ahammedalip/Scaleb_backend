@@ -4,6 +4,7 @@ interface Payment {
     userId: mongoose.Schema.Types.ObjectId,
     amount: number,
     period: string,
+    user: string,
 }
 
 
@@ -15,6 +16,9 @@ const paymentsSchema = new Schema({
     amount:{
         type: Number,
         // required: true,
+    },
+    role:{
+        type: String,
     },
     period:{
         type: String,
