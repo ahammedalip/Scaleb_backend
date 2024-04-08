@@ -9,6 +9,7 @@ import productionAdmin from "../../models/ProductionAdmin";
 import order from "../../models/Order";
 import reviews from "../../models/Reviews";
 import cron from 'node-cron'
+import payment from "../../models/Payments";
 
 interface CustomRequest extends Request {
     id: number,
@@ -159,7 +160,7 @@ export const profile = async (req: Request, res: Response) => {
         res.status(200).json({ success: true, message: 'user details fetched successfully', userDetails: verifyUser })
     } catch (error) {
         console.log('error at get profile');
-        return res.status(500).json({ success: false, message: 'Error while fetchin profile' })
+        res.status(500).json({ success: false, message: 'Error while fetchin profile' })
     }
 }
 
@@ -257,10 +258,10 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
     const prodId = req.body.prodId;
     try {
         const verifyRetailerSubscription = await retailerAdmin.findById(id)
-        if(verifyRetailerSubscription?.subscribed.active == undefined || verifyRetailerSubscription?.subscribed.active== false){
+        if (verifyRetailerSubscription?.subscribed.active == undefined || verifyRetailerSubscription?.subscribed.active == false) {
             if (verifyRetailerSubscription?.connectedProduction && verifyRetailerSubscription.connectedProduction.length >= 1) {
                 // Return or perform your desired action here
-                return res.status(200).json({success: false, message: 'not_subscribed'})
+                return res.status(200).json({ success: false, message: 'not_subscribed' })
             }
         }
         const validProduction = await productionAdmin.findById(prodId);
@@ -333,12 +334,27 @@ export const addSubscription = async (req: Request, res: Response) => {
                     subscribed: {
                         endDate: endDate,
                         active: true,
-                        duration
+                        duration: time
                     }
                 }
             }, { new: true }
 
         )
+        let paidAmount
+        if (time == 'six') {
+            paidAmount = 249
+
+        } else if (time == 'one') {
+            paidAmount = 399
+        }
+        const newPayment = new payment({
+            userId: id,
+            amount: paidAmount,
+            role: 'production',
+            period: time
+
+        })
+        await newPayment.save()
         res.status(200).json({ success: true, subscription })
     } catch (error) {
         console.log('error while updating subscription')
