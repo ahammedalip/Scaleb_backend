@@ -6,6 +6,7 @@ import retailerSales from '../../models/RetailerSales';
 import reviews from '../../models/Reviews';
 import mongoose from 'mongoose';
 import cron from 'node-cron';
+import payment from '../../models/Payments';
 
 interface CustomRequest extends Request {
     id: number,
@@ -363,6 +364,7 @@ export const addSubscription = async (req: Request, res: Response) => {
     }
 
     try {
+
         const subscription = await productionAdmin.findByIdAndUpdate(
             id,
             {
@@ -370,12 +372,28 @@ export const addSubscription = async (req: Request, res: Response) => {
                     subscribed: {
                         endDate: endDate,
                         active: true,
-                        duration
+                        duration: time
                     }
                 }
             }, { new: true }
 
         )
+        let paidAmount
+        if (time == 'six') {
+            paidAmount = 249
+
+        } else if (time == 'one') {
+            paidAmount = 399
+        }
+        const newPayment = new payment({
+            userId: id,
+            amount: paidAmount,
+            role: 'production',
+            period: time
+
+        })
+        await newPayment.save()
+
         res.status(200).json({ success: true, subscription })
     } catch (error) {
         console.log('error while updating subscription')
@@ -445,10 +463,10 @@ export const sortRetailer = async (req: Request, res: Response) => {
             await retailerAdmin.updateOne({ _id: rating._id }, { averageRating: rating.averageRating });
         }
 
-        const sortedRetailers = await retailerAdmin.find({isBlocked:false, isVerified:true}).sort({ averageRating: sortOrder });
+        const sortedRetailers = await retailerAdmin.find({ isBlocked: false, isVerified: true }).sort({ averageRating: sortOrder });
 
         console.log('sorted retailers', sortedRetailers);
-        res.status(200).json({ sortedRetailers, success:true })
+        res.status(200).json({ sortedRetailers, success: true })
     } catch (error) {
         console.log('error while sorting', error);
         res.status(500)
