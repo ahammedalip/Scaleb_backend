@@ -11,15 +11,16 @@ interface Payment {
 const paymentsSchema = new Schema({
     userId :{
         type: mongoose.Schema.Types.ObjectId,
-        // required: true
+        refPath: 'role',
     },
     amount:{
         type: Number,
         // required: true,
     },
-    role:{
+    role: {
         type: String,
-    },
+        enum: ['RetailerAdmin', 'ProductionAdmin'],
+    },    
     period:{
         type: String,
 
