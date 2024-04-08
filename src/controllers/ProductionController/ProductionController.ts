@@ -388,7 +388,7 @@ export const addSubscription = async (req: Request, res: Response) => {
         const newPayment = new payment({
             userId: id,
             amount: paidAmount,
-            role: 'production',
+            role: 'ProductionAdmin',
             period: time
 
         })
@@ -396,7 +396,7 @@ export const addSubscription = async (req: Request, res: Response) => {
 
         res.status(200).json({ success: true, subscription })
     } catch (error) {
-        console.log('error while updating subscription')
+        console.log('error while updating subscription', error)
         res.status(500)
     }
 
