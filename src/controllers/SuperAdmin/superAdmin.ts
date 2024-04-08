@@ -4,6 +4,7 @@ import { errorhandler } from "../../utils/errorhandler";
 import jwt from 'jsonwebtoken'
 import retailerAdmin from "../../models/RetailerAdmin";
 import productionAdmin from "../../models/ProductionAdmin";
+import payment from "../../models/Payments";
 
 interface SuperAdmin {
     username: string;
@@ -124,4 +125,17 @@ export const blockUser = async (req: Request, res: Response) => {
             res.status(500).json({ success: true, message: 'Error at Blocking user' })
         }
     }
+}
+
+export const getRevenue = async(req:Request, res:Response)=>{
+    console.log('jiiii')
+    try {
+        const getRevenue = await payment.find().populate('')
+        console.log('get revenue', getRevenue)
+        res.status(200).json({success:true, revenueList:getRevenue})
+    } catch (error) {
+        console.log('error at get revenue', error)
+        res.status(500)
+    }
+
 }
