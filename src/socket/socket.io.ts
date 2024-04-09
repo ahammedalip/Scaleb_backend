@@ -87,10 +87,7 @@ export const SocketServer = (server: any) => {
     }
 
     io.listen(3001)
-
-
-
-    return io;
+ return io;
 }
 
 
