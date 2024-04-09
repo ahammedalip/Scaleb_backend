@@ -4,7 +4,8 @@ interface Message extends Document {
    conversationId: string;
    sender: string;
    text: string;
-   imageUrl:string;
+   imageUrl: string;
+   videoUrl: string;
 }
 
 const messageSchema = new Schema<Message>({
@@ -14,13 +15,16 @@ const messageSchema = new Schema<Message>({
    sender: {
       type: String
    },
-   text:{
+   text: {
       type: String
    },
-   imageUrl:{
-      type:String
+   imageUrl: {
+      type: String
+   },
+   videoUrl: {
+      type: String
    }
 },
-{timestamps: true})
+   { timestamps: true })
 
 export const Messages = model<Message>('Message', messageSchema)
