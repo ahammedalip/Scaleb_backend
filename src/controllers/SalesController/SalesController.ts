@@ -7,13 +7,14 @@ import order from "../../models/Order";
 import { Document, Model, model, Schema, Types } from 'mongoose';
 import reviews from "../../models/Reviews";
 import mongoose from 'mongoose';
+import { CustomRequest } from "../../interfaces/interfaces";
 
 // view sales executive
 
 
 
 
-export const getAvailableProduction = async (req: Request, res: Response) => {
+export const getAvailableProduction = async (req: CustomRequest, res: Response) => {
     const id = req.id;
     const pageSize: number = 6
     try {
@@ -80,7 +81,7 @@ export const viewIndividualprofile = async (req: Request, res: Response) => {
     }
 }
 
-export const createOrder = async (req: Request, res: Response) => {
+export const createOrder = async (req: CustomRequest, res: Response) => {
     const id = req.id;
     // console.log('sales id ', id);
     // console.log('in createorder------', req.body);
@@ -119,7 +120,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
 }
 
-export const fetchOrder = async (req: Request, res: Response) => {
+export const fetchOrder = async (req: CustomRequest, res: Response) => {
 
     const id = req.id
     const pageSize: number = 2;
@@ -168,7 +169,7 @@ export const editOrderRequest = async (req: Request, res: Response) => {
     }
 }
 
-export const editOrder = async (req: Request, res: Response) => {
+export const editOrder = async (req: CustomRequest, res: Response) => {
     const id = req.id
     console.log('from req.body', req.body);
     try {
@@ -179,7 +180,7 @@ export const editOrder = async (req: Request, res: Response) => {
     }
 }
 
-export const deleteOrder = async (req: Request, res: Response) => {
+export const deleteOrder = async (req: CustomRequest, res: Response) => {
     const id = req.id
     const orderId = req.body.orderId
     try {
@@ -221,7 +222,6 @@ export const checkSubscription = async (req: Request, res: Response) => {
             const salesAdmin = verifySales.retailerAdminId
 
             const verifyAdmin = await retailerAdmin.findById(salesAdmin)
-            // console.log('sales admin', verifyAdmin);
 
             return res.status(200).json({ success: true, admin: verifyAdmin?.subscribed })
         }
