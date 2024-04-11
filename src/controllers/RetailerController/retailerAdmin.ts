@@ -1,5 +1,4 @@
-// import exp from "constants";
-import { Request, Response } from "express";
+import { Request, Response, RequestHandler } from "express";
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer';
@@ -10,11 +9,8 @@ import order from "../../models/Order";
 import reviews from "../../models/Reviews";
 import cron from 'node-cron'
 import payment from "../../models/Payments";
+import { CustomRequest } from "../../interfaces/interfaces";
 
-interface CustomRequest extends Request {
-    id: number,
-    role: string
-}
 
 // Schedule a job to run every day at 12 pm
 cron.schedule('0 12 * * *', async () => {
@@ -147,7 +143,7 @@ export const blockSalesExec = async (req: Request, res: Response) => {
     }
 }
 
-export const profile = async (req: Request, res: Response) => {
+export const profile = async (req: CustomRequest, res: Response) => {
     const userRole = req.role;
     const userId = req.id;
     console.log('coming here');
@@ -164,28 +160,26 @@ export const profile = async (req: Request, res: Response) => {
     }
 }
 
-export const connectedProd = async (req: Request, res: Response) => {
-    console.log('coming ar connected prod');
+export const connectedProd = async (req: CustomRequest, res: Response) => {
     const id = req.id;
     try {
         const connected = await retailerAdmin.findOne(
             { _id: id }
         ).populate('connectedProduction'); // Corrected: Use the string 'connectedProduction'
 
-        // console.log(connected?.connectedProduction);
         const availableProduction = connected?.connectedProduction
         return res.status(200).json({ success: true, message: 'user list fetched successfully', availableProduction })
     } catch (error) {
-
+        console.log('error while getting connected production', error)
+        res.status(500)
     }
 }
 
 
 
 
-export const avialableProd = async (req: Request, res: Response) => {
-    // console.log('coming here');
-    const id = req.id
+export const avialableProd = async (req: CustomRequest, res: Response) => {
+    const id = req?.id
 
     try {
         const retailer = await retailerAdmin.findById(id);
@@ -210,7 +204,6 @@ export const avialableProd = async (req: Request, res: Response) => {
 
 export const showProductionprofile = async (req: Request, res: Response) => {
     const { id } = req.query
-    console.log('id is--', id);
 
     try {
         const isvalidUser = await productionAdmin.findById(id)
@@ -244,7 +237,6 @@ export const showProductionprofile = async (req: Request, res: Response) => {
             averageToFive = Math.ceil((averageRating[0].averageRating / 2) * 2) / 2;
         }
 
-        // console.log('adkfljaksdljfas', averageToFive)
 
         return res.status(200).json({ success: true, message: 'user details fetched successfully', userDetails: isvalidUser, rating: averageToFive })
     } catch (error) {
@@ -253,7 +245,7 @@ export const showProductionprofile = async (req: Request, res: Response) => {
     }
 }
 
-export const sendConnectionRequest = async (req: Request, res: Response) => {
+export const sendConnectionRequest = async (req: CustomRequest, res: Response) => {
     const id = req.id;
     const prodId = req.body.prodId;
     try {
@@ -301,10 +293,9 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
 export const getOrder = async (req: Request, res: Response) => {
     const retailerId = req.query.id;
     try {
-        const countOrder = await order.countDocuments()
+        const countOrder = await order.countDocuments({ retailerId })
 
         const orders = await order.find({ retailerId }).populate('salesExecId').populate('productionId')
-        console.log('orderssssssss==============', orders)
 
         res.status(200).json({ success: true, orders, countOrder });
     } catch (error) {
@@ -358,8 +349,63 @@ export const addSubscription = async (req: Request, res: Response) => {
         await newPayment.save()
         res.status(200).json({ success: true, subscription })
     } catch (error) {
-        console.log('error while updating subscription',error)
+        console.log('error while updating subscription', error)
         res.status(500)
     }
 
 }
+
+export const getReport = async (req: Request, res: Response) => {
+    let userId = req.query.id?.toString();
+
+
+    try {
+        const verifyRetailer = await retailerAdmin.findById(userId)
+        if (!verifyRetailer) {
+            return res.status(403).json({ success: false, message: 'user not found' })
+        }
+
+        const orders = await order.aggregate([
+            {
+                $match: { retailerId: new mongoose.Types.ObjectId(userId) } // Filter orders for the given retailerId
+            },
+            {
+                $group: {
+                    _id: '$salesExecId',
+                    totalOrders: { $sum: 1 } // Count the number of orders for each salesExecId
+                }
+            }
+        ]);
+        const populatedOrders = await order.populate(orders, { path: '_id', model: 'RetailerSales' });
+        const responseData = populatedOrders.map((order: any) => ({
+            retailerName: order._id.username, 
+            totalOrders: order.totalOrders
+        }));
+
+
+        const orderToProd = await order.aggregate([
+            {
+                $match: { retailerId: new mongoose.Types.ObjectId(userId) } 
+            },
+            {
+                $group: {
+                    _id: '$productionId',
+                    totalOrders: { $sum: 1 } 
+                }
+            }
+        ]);
+
+        const populatedOrdersToProd = await order.populate(orderToProd, { path: '_id', model: 'ProductionAdmin' });
+        const responseDataToProd = populatedOrdersToProd.map((order: any) => ({
+            productionName: order._id.productionName,
+            totalOrders: order.totalOrders
+        }));
+
+        res.status(200).json({ success: true, message: 'Orders fetched successfully', orders: responseData , ordersToProd: responseDataToProd});
+    } catch (error) {
+        console.log('error while fetching reports', error)
+        res.status(500)
+    }
+}
+
+
