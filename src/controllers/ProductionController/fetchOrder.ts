@@ -1,14 +1,10 @@
 import { Request, Response } from 'express'
-import productionAdmin from '../../models/ProductionAdmin';
-import retailerAdmin from '../../models/RetailerAdmin';
 import order from '../../models/Order';
-import retailerSales from '../../models/RetailerSales';
-import reviews from '../../models/Reviews';
-import mongoose from 'mongoose';
+import { CustomRequest } from '../../interfaces/interfaces';
 
 
 
-export const fetchOrdersAll = async (req: Request, res: Response) => {
+export const fetchOrdersAll = async (req: CustomRequest, res: Response) => {
     const id = req.id
     const filter = req.query.filter
 
@@ -152,7 +148,7 @@ export const fetchOrdersAll = async (req: Request, res: Response) => {
 
 }
 
-export const acceptOrder = async (req: Request, res: Response) => {
+export const acceptOrder = async (req: CustomRequest, res: Response) => {
     const id = req.id
 
     const orderId = req.body.orderId
@@ -176,7 +172,7 @@ export const acceptOrder = async (req: Request, res: Response) => {
     }
 }
 
-export const rejectOrder = async (req: Request, res: Response) => {
+export const rejectOrder = async (req: CustomRequest, res: Response) => {
     const id = req.id
     const orderId = req.body.orderId
     // console.log('coming to reject order', id, orderId);
@@ -195,5 +191,18 @@ export const rejectOrder = async (req: Request, res: Response) => {
     } catch (error) {
         console.log('error at rejecting order', error);
         return res.status(500).json({ success: false, message: 'error at rejecting order ' })
+    }
+}
+
+
+export const countOrder = async(req:CustomRequest, res:Response)=>{
+    const id = req.id
+    try{
+        const countOrder = await order.countDocuments({productionId:id})
+        console.log(countOrder)
+        return res.status(200).json({success:true, countOrder})
+    }catch(error){
+        console.log('error at count order ',error)
+        res.status(500)
     }
 }
