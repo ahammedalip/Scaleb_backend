@@ -357,8 +357,6 @@ export const addSubscription = async (req: Request, res: Response) => {
 
 export const getReport = async (req: Request, res: Response) => {
     let userId = req.query.id?.toString();
-
-
     try {
         const verifyRetailer = await retailerAdmin.findById(userId)
         if (!verifyRetailer) {
