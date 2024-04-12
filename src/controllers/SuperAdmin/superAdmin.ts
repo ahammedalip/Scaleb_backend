@@ -134,12 +134,12 @@ export const getRevenue = async (req: Request, res: Response) => {
 
         const totalPaymentDoc = await payment.countDocuments()
 
-        const totalPages = Math.ceil(totalPaymentDoc/pageSize)
+        const totalPages = Math.ceil(totalPaymentDoc / pageSize)
 
         const getRevenue = await payment.find()
-        .skip((page-1)*pageSize)
-        .limit(Number(pageSize))
-        .populate('userId')
+            .skip((page - 1) * pageSize)
+            .limit(Number(pageSize))
+            .populate('userId')
         // console.log('get revenue', getRevenue)
 
         const totalPayment = await payment.aggregate([
@@ -158,4 +158,32 @@ export const getRevenue = async (req: Request, res: Response) => {
         res.status(500)
     }
 
+}
+
+export const miniReport = async (req: Request, res: Response) => {
+    try {
+        const countRetailer = await retailerAdmin.countDocuments({
+            isBlocked:false,
+            isVerified:true
+        })
+        const countProduction = await productionAdmin.countDocuments({
+            isBlocked:false,
+            isVerified:true,
+        })
+
+        const totalPayment = await payment.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: '$amount' }
+                }
+            }
+        ])
+        const totalAmount = totalPayment[0].totalAmount
+
+        res.status(200).json({success:true, countRetailer, countProduction, totalAmount})
+    } catch (error) {
+        console.log('error while fetching miniReport', error);
+        res.status(500)
+    }
 }
