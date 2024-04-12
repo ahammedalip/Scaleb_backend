@@ -7,11 +7,7 @@ import reviews from '../../models/Reviews';
 import mongoose from 'mongoose';
 import cron from 'node-cron';
 import payment from '../../models/Payments';
-
-interface CustomRequest extends Request {
-    id: number,
-    role: string
-}
+import { CustomRequest } from '../../interfaces/interfaces';
 
 // Schedule a job to run every day at 12 pm
 cron.schedule('0 12 * * *', async () => {
@@ -24,7 +20,7 @@ cron.schedule('0 12 * * *', async () => {
 });
 
 
-export const getProfile = async (req: Request, res: Response) => {
+export const getProfile = async (req: CustomRequest, res: Response) => {
 
     const userRole = req.role;
     const userId = req.id;
@@ -44,7 +40,7 @@ export const getProfile = async (req: Request, res: Response) => {
 
 }
 
-export const addItem = async (req: Request, res: Response) => {
+export const addItem = async (req: CustomRequest, res: Response) => {
     const userId = req.id;
     const { name } = req.body
 
@@ -73,7 +69,7 @@ export const addItem = async (req: Request, res: Response) => {
 
 }
 
-export const fetchRequestedRetailers = async (req: Request, res: Response) => {
+export const fetchRequestedRetailers = async (req: CustomRequest, res: Response) => {
     const id = req.id;
 
     try {
@@ -90,11 +86,12 @@ export const fetchRequestedRetailers = async (req: Request, res: Response) => {
         }
         return res.status(200).json({ success: true, message: 'fetched users', userDetails: notBlockedRetailers })
     } catch (error) {
-
+        console.log('error at fetchReequestedRetailer', error)
+        res.status(500)
     }
 }
 
-export const acceptReq = async (req: Request, res: Response) => {
+export const acceptReq = async (req: CustomRequest, res: Response) => {
     const id = req.id;
     const retailId = req.body.id
 
@@ -161,7 +158,7 @@ export const acceptReq = async (req: Request, res: Response) => {
     }
 }
 
-export const rejectReq = async (req: Request, res: Response) => {
+export const rejectReq = async (req: CustomRequest, res: Response) => {
     const id = req.id
     const retailerId = req.query.id
 
@@ -183,7 +180,7 @@ export const rejectReq = async (req: Request, res: Response) => {
 }
 
 
-export const availableSales = async (req: Request, res: Response) => {
+export const availableSales = async (req: CustomRequest, res: Response) => {
     const id = req.id;
 
     try {
@@ -469,6 +466,36 @@ export const sortRetailer = async (req: Request, res: Response) => {
         res.status(200).json({ sortedRetailers, success: true })
     } catch (error) {
         console.log('error while sorting', error);
+        res.status(500)
+    }
+}
+
+
+export const getReports = async (req: CustomRequest, res: Response) => {
+    const id = req.id
+    try {
+        const orders = await order.aggregate([
+            {
+                $match: { productionId: new mongoose.Types.ObjectId(id) }
+            },
+            {
+                $group: {
+                    _id: '$retailerId',
+                    totalOrders: { $sum: 1 }
+                }
+            }
+        ])
+        console.log(orders)
+        const populateRetailer = await order.populate(orders, { path: '_id', model: 'RetailerAdmin' })
+        const responseData = populateRetailer.map((ord:any) => ({
+            retailerName: ord._id.retailerName,
+            totalOrders: ord.totalOrders
+        }))
+        console.log('responsse data', responseData)
+
+        res.status(200).json({success:true, pieChart: responseData})
+    } catch (error) {
+        console.log('error while fetching reports', error)
         res.status(500)
     }
 }
