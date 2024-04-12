@@ -4,10 +4,11 @@ import retailerSales from "../../models/RetailerSales";
 import exp from "constants";
 import productionAdmin from "../../models/ProductionAdmin";
 import order from "../../models/Order";
-import { Document, Model, model, Schema, Types } from 'mongoose';
+import { Document, Model, model, Mongoose, Schema, Types } from 'mongoose';
 import reviews from "../../models/Reviews";
 import mongoose from 'mongoose';
 import { CustomRequest } from "../../interfaces/interfaces";
+import path from "path";
 
 // view sales executive
 
@@ -31,8 +32,8 @@ export const getAvailableProduction = async (req: CustomRequest, res: Response) 
 
         const connected = findProd?.connectedProduction
         const totalProd = connected?.length
-    
-        
+
+
         return res.status(200).json({ success: true, message: 'user list fetched successfully', availableProduction: connected })
 
     } catch (error) {
@@ -73,8 +74,8 @@ export const viewIndividualprofile = async (req: Request, res: Response) => {
         if (averageRating.length > 0) {
             averageToFive = Math.ceil((averageRating[0].averageRating / 2) * 2) / 2;
         }
-        console.log('rating is -=-=-=-',averageToFive)
-        return res.status(200).json({ success: true, message: 'user profile fetched successfully', userDetails: production, rating:averageToFive })
+        console.log('rating is -=-=-=-', averageToFive)
+        return res.status(200).json({ success: true, message: 'user profile fetched successfully', userDetails: production, rating: averageToFive })
     } catch (error) {
         console.log('error at fetching individual profile', error);
         res.status(500).json({ success: false, message: 'error while user profile fetching' })
@@ -176,7 +177,8 @@ export const editOrder = async (req: CustomRequest, res: Response) => {
 
 
     } catch (error) {
-
+        console.log('error while editing order', error)
+        res.status(500)
     }
 }
 
@@ -227,6 +229,54 @@ export const checkSubscription = async (req: Request, res: Response) => {
         }
     } catch (error) {
         console.log('error while checking for subscription', error)
+        res.status(500)
+    }
+}
+
+export const getReport = async (req: CustomRequest, res: Response) => {
+    const id = req.id;
+    try {
+        const OrderCount = await order.countDocuments({ salesExecId: id })
+
+        const salesExec = await retailerSales.findById(id)
+        const retailerAdminId = salesExec?.retailerAdminId
+
+        const orders = await order.aggregate([
+            {
+                $match: { retailerId: new mongoose.Types.ObjectId(retailerAdminId) }
+            }, {
+                $group: {
+                    _id: '$salesExecId',
+                    totalOrders: { $sum: 1 }
+                }
+            }
+        ])
+        const populatedOrders = await order.populate(orders, { path: '_id', model: 'RetailerSales' })
+        const responseData = populatedOrders.map((order: any) => ({
+            retailerName: order._id.username,
+            totalOrders: order.totalOrders
+        }))
+
+        const orderToProd = await order.aggregate([
+            {
+                $match: { salesExecId: new mongoose.Types.ObjectId(id) }
+            },
+            {
+                $group: {
+                    _id: '$productionId',
+                    totalOrders: { $sum: 1 }
+                }
+            }
+        ])
+
+        const populatedOrdersToProd = await order.populate(orderToProd, { path: '_id', model: 'ProductionAdmin' })
+        const responseDataToProd = populatedOrdersToProd.map((order: any) => ({
+            productionAdmin: order._id.productionName,
+            totalOrders: order.totalOrders
+        }))
+        res.status(200).json({ success: true, OrderCount, barChart: responseData , pieChart:responseDataToProd})
+    } catch (error) {
+        console.log('error while fetching report', error)
         res.status(500)
     }
 }
