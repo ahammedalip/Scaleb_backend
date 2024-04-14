@@ -38,7 +38,7 @@ app.use(morgan('tiny'));
 // }))
 
 app.use(cors({
-    origin: 'https://scaleb-frontend.vercel.app',
+    origin: process.env.FRONTEND_URL,
     credentials: true
 }))
 // app.use((req, res, next) => {

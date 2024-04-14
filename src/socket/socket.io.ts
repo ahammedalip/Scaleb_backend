@@ -15,9 +15,10 @@ export const SocketServer = (server: any) => {
         cors: {
             // origin: 'http://localhost:5173' 
             // origin: 'https://scaleb-frontend-4qtpugzb0-ahammed-alis-projects.vercel.app'
-          origin:   'https://scaleb-frontend.vercel.app'
+          origin:   process.env.FRONTEND_URL
         }
     })
+
 
 
     io.on("connection", (socket) => {
