@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import productionAdmin from "../models/ProductionAdmin";
-import retailerAdmin from "../models/RetailerAdmin";
 import { CustomRequest } from "../interfaces/interfaces";
+import { retailerAdmin } from "../models/RetailerAdmin";
 
 
 

@@ -3,7 +3,7 @@ import { verifyProduction } from '../../utils/verifyUser';
 import {
     acceptReq, addItem, addSubscription, availableSales, fetchRequestedRetailers,
     getAvailRetailList, getConnRetailersList, getProfile, getReports, getRetailerProfile, getSalesProfile,
-    rejectReq, reports, searchRetailer, sendConnectionRequest,
+    rejectReq, searchRetailer, sendConnectionRequest,
     sortRetailer
 } from '../../controllers/ProductionController/ProductionController';
 import { acceptOrder, countOrder, fetchOrdersAll, rejectOrder } from '../../controllers/ProductionController/fetchOrder';

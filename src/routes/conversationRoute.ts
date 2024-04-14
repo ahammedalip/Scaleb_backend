@@ -1,5 +1,5 @@
 import express from 'express'
-import { conversation, getConversation, getMessageProd, getMessageSales, sendMessageProduction, sendMessageSales } from '../controllers/conversationController';
+import { conversation, getConversation } from '../controllers/conversationController';
 import { verifySender } from '../utils/verifyUser';
 
 const router = express.Router()
