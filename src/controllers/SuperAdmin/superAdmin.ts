@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { errorhandler } from "../../utils/errorhandler";
 import jwt from 'jsonwebtoken'
-import retailerAdmin from "../../models/RetailerAdmin";
 import productionAdmin from "../../models/ProductionAdmin";
 import payment from "../../models/Payments";
 import superAdmin from '../../models/SuperAdmin';
+import retailerAdmin from '../../models/RetailerAdmin';
 
 interface SuperAdmin {
     username: string;

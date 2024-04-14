@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import retailerAdmin from "../../models/RetailerAdmin";
 import retailerSales from "../../models/RetailerSales";
 import exp from "constants";
 import productionAdmin from "../../models/ProductionAdmin";
@@ -9,6 +8,7 @@ import reviews from "../../models/Reviews";
 import mongoose from 'mongoose';
 import { CustomRequest } from "../../interfaces/interfaces";
 import path from "path";
+import retailerAdmin from "../../models/RetailerAdmin";
 
 // view sales executive
 

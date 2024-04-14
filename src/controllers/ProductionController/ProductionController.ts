@@ -1,6 +1,5 @@
 import { Request, Response } from 'express'
 import productionAdmin from '../../models/ProductionAdmin';
-import retailerAdmin from '../../models/RetailerAdmin';
 import order from '../../models/Order';
 import retailerSales from '../../models/RetailerSales';
 import reviews from '../../models/Reviews';
@@ -8,6 +7,7 @@ import mongoose, { Document, Schema, model, Types } from 'mongoose';
 import cron from 'node-cron';
 import payment from '../../models/Payments';
 import { CustomRequest } from '../../interfaces/interfaces';
+import retailerAdmin from '../../models/RetailerAdmin';
 
 
 

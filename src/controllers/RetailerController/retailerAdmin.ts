@@ -2,7 +2,6 @@ import { Request, Response, RequestHandler } from "express";
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer';
-import retailerAdmin from "../../models/RetailerAdmin";
 import retailerSales from "../../models/RetailerSales";
 import productionAdmin from "../../models/ProductionAdmin";
 import order from "../../models/Order";
@@ -10,6 +9,7 @@ import reviews from "../../models/Reviews";
 import cron from 'node-cron'
 import payment from "../../models/Payments";
 import { CustomRequest } from "../../interfaces/interfaces";
+import retailerAdmin from "../../models/RetailerAdmin";
 
 
 // Schedule a job to run every day at 12 pm

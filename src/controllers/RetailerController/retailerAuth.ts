@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express"
 import session from 'express-session'
-import retailerAdmin from "../../models/RetailerAdmin";
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer'
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import retailerSales from "../../models/RetailerSales";
+import retailerAdmin from "../../models/RetailerAdmin";
 
 
 
