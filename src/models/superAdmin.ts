@@ -18,6 +18,6 @@ const userSchema = new Schema<UserInterface>({
   },
 });
 
-const superAdmin = model<UserInterface>('superAdmin', userSchema);
+export const superAdmin = model<UserInterface>('superAdmin', userSchema);
 
-export default superAdmin;
+
