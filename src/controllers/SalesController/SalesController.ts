@@ -8,7 +8,7 @@ import reviews from "../../models/Reviews";
 import mongoose from 'mongoose';
 import { CustomRequest } from "../../interfaces/interfaces";
 import path from "path";
-import retailerAdmin from "../../models/RetailerAdmin";
+import { retailerAdmin } from "../../models/RetailerAdmin";
 
 // view sales executive
 

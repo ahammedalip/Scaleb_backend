@@ -7,7 +7,7 @@ import mongoose, { Document, Schema, model, Types } from 'mongoose';
 import cron from 'node-cron';
 import payment from '../../models/Payments';
 import { CustomRequest } from '../../interfaces/interfaces';
-import retailerAdmin from '../../models/RetailerAdmin';
+import { retailerAdmin } from '../../models/RetailerAdmin';
 
 
 

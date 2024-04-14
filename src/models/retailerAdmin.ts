@@ -80,6 +80,6 @@ const userSchema = new Schema<UserInterface>({
 
 })
 
-const retailerAdmin = model<UserInterface>('RetailerAdmin', userSchema);
+export const retailerAdmin = model<UserInterface>('RetailerAdmin', userSchema);
 
-export default retailerAdmin; 
+// export default retailerAdmin; 

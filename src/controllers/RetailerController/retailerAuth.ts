@@ -4,7 +4,7 @@ import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer'
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import retailerSales from "../../models/RetailerSales";
-import retailerAdmin from "../../models/RetailerAdmin";
+import { retailerAdmin } from "../../models/RetailerAdmin";
 
 
 

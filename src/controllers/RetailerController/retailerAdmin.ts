@@ -9,7 +9,7 @@ import reviews from "../../models/Reviews";
 import cron from 'node-cron'
 import payment from "../../models/Payments";
 import { CustomRequest } from "../../interfaces/interfaces";
-import retailerAdmin from "../../models/RetailerAdmin";
+import { retailerAdmin } from "../../models/RetailerAdmin";
 
 
 // Schedule a job to run every day at 12 pm
