@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import retailerAdmin from '../models/RetailerAdmin';
-import productionAdmin from '../models/ProductionAdmin';
+// import retailerAdmin from '../models/RetailerAdmin';
+// import productionAdmin from '../models/ProductionAdmin';
 
 export const createCheckout = async (req: Request, res: Response) => {
     console.log('querryry', req.body);

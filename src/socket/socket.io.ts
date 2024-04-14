@@ -13,7 +13,9 @@ let users: User[] = []
 export const SocketServer = (server: any) => {
     const io = new Server(server, {
         cors: {
-            origin: 'http://localhost:5173'
+            // origin: 'http://localhost:5173' 
+            // origin: 'https://scaleb-frontend-4qtpugzb0-ahammed-alis-projects.vercel.app'
+          origin:   'https://scaleb-frontend.vercel.app'
         }
     })
 

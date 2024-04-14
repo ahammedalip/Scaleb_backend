@@ -13,10 +13,10 @@ export const productionValidation = async (req: Request, res: Response) => {
         const existingEmail = await productionAdmin.findOne({ email });
 
         if (existingProduction) {
-            res.status(400).json({ success: false, message: "Name already exists!" });
+           return res.status(400).json({ success: false, message: "Name already exists!" });
         }
         if (existingEmail) {
-            res.status(400).json({ success: false, message: 'Email already exists' })
+          return  res.status(400).json({ success: false, message: 'Email already exists' })
         }
         const generatedOTP: number = Math.floor(100000 + Math.random() * 900000)
         const hashedPass: string = bcryptjs.hashSync(password, 2)
@@ -49,10 +49,10 @@ export const productionValidation = async (req: Request, res: Response) => {
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.log(error);
-                res.status(400).json({ success: false, message: "Error at sending mail" })
+               return  res.status(400).json({ success: false, message: "Error at sending mail" })
             } else {
                 console.log('Email sent: ' + info.response);
-                res.status(250).json({ success: true, message: 'OTP send succesfully' })
+                return res.status(250).json({ success: true, message: 'OTP send succesfully' })
             }
         });
     } catch (err: any) {
@@ -76,7 +76,7 @@ export const otpVerification = async (req: Request, res: Response) => {
         const verifyEmail = await productionAdmin.findOne({ email });
         const verifyOTP = verifyEmail?.otpCode == otp;
         if (!verifyEmail || !verifyOTP) {
-            res.status(401).json({ success: false, message: 'OTP entered is incorrect. Please try again.' })
+            return res.status(401).json({ success: false, message: 'OTP entered is incorrect. Please try again.' })
         }
         if (verifyOTP) {
             const updated = await productionAdmin.updateOne(
@@ -98,14 +98,14 @@ export const login = async (req: Request, res: Response) => {
         const validUser = await productionAdmin.findOne({ productionName })
 
         if (!validUser) {
-            res.status(401).json({ success: false, message: 'Enter valid credentials' })
+           return res.status(401).json({ success: false, message: 'Enter valid credentials' })
         }
 
         const verifyPass = bcryptjs.compareSync(password, validUser.password)
         if (!verifyPass) {
-            res.status(401).json({ success: false, message: 'Password is wrong' })
+           return  res.status(401).json({ success: false, message: 'Password is wrong' })
         }
-        validUser.verifyPass = '';
+        validUser.password = '';
 
         const token = jwt.sign({ id: validUser?._id.toString(), role: 'productionAdmin' }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
         const expiry: Date = new Date(Date.now() + 3600000)

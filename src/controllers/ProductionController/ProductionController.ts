@@ -4,10 +4,12 @@ import retailerAdmin from '../../models/RetailerAdmin';
 import order from '../../models/Order';
 import retailerSales from '../../models/RetailerSales';
 import reviews from '../../models/Reviews';
-import mongoose from 'mongoose';
+import mongoose, { Document, Schema, model, Types } from 'mongoose';
 import cron from 'node-cron';
 import payment from '../../models/Payments';
 import { CustomRequest } from '../../interfaces/interfaces';
+
+
 
 // Schedule a job to run every day at 12 pm
 cron.schedule('0 12 * * *', async () => {
@@ -75,7 +77,7 @@ export const fetchRequestedRetailers = async (req: CustomRequest, res: Response)
     try {
         const fetchUser = await productionAdmin.findById(id).populate('requestedRetailer');
 
-        const notBlockedRetailers: any = fetchUser?.requestedRetailer.filter(retailer => !retailer.isBlocked);
+        const notBlockedRetailers: any = fetchUser?.requestedRetailer.filter((retailer:any) => !retailer.isBlocked);
 
         if (notBlockedRetailers.length > 0) {
             // console.log('Some requested retailers are :', notBlockedRetailers);
@@ -185,8 +187,8 @@ export const availableSales = async (req: CustomRequest, res: Response) => {
 
     try {
         const productionAdminDoc = await productionAdmin.findById(id).populate('connectedRetailer')
-        const connectedRetailerId = productionAdminDoc?.connectedRetailer.map(retailer => retailer._id)
 
+        const connectedRetailerId = productionAdminDoc?.connectedRetailer.map((retailer: any) => retailer._id);
         const salesExecutive = await retailerSales.find({
             retailerAdminId: { $in: connectedRetailerId },
             isBlocked: false
@@ -216,21 +218,56 @@ export const getSalesProfile = async (req: Request, res: Response) => {
 }
 
 
-export const getConnRetailersList = async (req: Request, res: Response) => {
-    const id = req.query.id
+export const getConnRetailersList = async (req: CustomRequest, res: Response) => {
+    const id = req.id
+    console.log(req.query, 'in  connected')
+    const { search, sort } = req.query
+    console.log(search, sort);
+    if (typeof search !== 'string') {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid search value",
+        });
+    }
     try {
-        const connectedRetailer = await productionAdmin.findById(id).populate('connectedRetailer')
-        const connected = connectedRetailer?.connectedRetailer
-        // console.log(connected);
-        res.status(200).json({ success: true, message: 'fetched successfully', connected })
+        let query: any = { isBlocked: false, isVerified: true };
+
+        if (search) {
+            query.retailerName = { $regex: new RegExp(search, 'i') };
+        }
+
+        const connectedRetailer = await productionAdmin.findById(id).populate('connectedRetailer');
+        let connected = connectedRetailer?.connectedRetailer;
+        if (search && connected) {
+            connected = connected.filter((retailer: any) => retailer.retailerName.match(new RegExp(search, 'i')));
+        }
+
+        if (sort && sort === '1') {
+            connected = connected?.sort((a: any, b: any) => {
+                const nameA = a.retailerName?.toUpperCase();
+                const nameB = b.retailerName?.toUpperCase();
+                if (nameA < nameB) {
+                    return -1;
+                }
+                if (nameA > nameB) {
+                    return 1;
+                }
+                return 0;
+            });
+        }
+        console.log(connected);
+        res.status(200).json({ success: true, message: 'fetched successfully', connected });
+
     } catch (error) {
         console.log('Error while fetching connected retailers', error);
         return res.status(500).json({ success: false, message: 'Error at  while fetching connected retailers' })
     }
 }
 
-export const getAvailRetailList = async (req: Request, res: Response) => {
-    const id = req.query.id
+export const getAvailRetailList = async (req: CustomRequest, res: Response) => {
+    const id = req.id
+    console.log('in avialable', req.query);
+
     const pageSize: number = 6;
     try {
         const { page = 1 } = req.query as { page?: number }
@@ -258,6 +295,77 @@ export const getAvailRetailList = async (req: Request, res: Response) => {
     } catch (error) {
         console.log('error while fetching available retailers', error)
         res.status(500).json({ success: false, message: 'Error while fetching available retailers' })
+    }
+}
+
+
+export const searchRetailer = async (req: Request, res: Response) => {
+
+    const searchVal = req.query.value
+    if (typeof searchVal !== 'string') {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid search value",
+        });
+    }
+
+    try {
+        const searchPattern = new RegExp(searchVal, 'i');
+
+        // Use the $regex operator to find retailers whose name matches the pattern
+        const searchRetailer = await retailerAdmin.find({
+            retailerName: { $regex: searchPattern },
+            isBlocked: false,
+            isVerified: true
+        });
+
+        if (searchRetailer.length > 0) {
+            res.status(200).json({
+                success: true,
+                message: "Retailers found",
+                retailers: searchRetailer
+            });
+        } else {
+            res.status(200).json({
+                success: true,
+                message: "No retailers found matching the search criteria",
+                retailers: []
+            });
+        }
+    } catch (error) {
+        console.log('error while searching data', error)
+        res.status(500)
+    }
+}
+
+export const sortRetailer = async (req: Request, res: Response) => {
+    const value = req.query.value
+    console.log('sort value', value)
+    try {
+        const sortOrder = value === '1' ? 1 : -1;
+
+        const retailerRatings = await reviews.aggregate([
+            {
+                $group: {
+                    _id: '$reviewee.id', // Group by retailer id
+                    averageRating: { $avg: '$rating' } // Calculate average rating
+                }
+            },
+            {
+                $sort: { averageRating: sortOrder } // Sort by average rating
+            }
+        ]);
+        for (const rating of retailerRatings) {
+            await retailerAdmin.updateOne({ _id: rating._id }, { averageRating: rating.averageRating });
+        }
+
+        const sortedRetailers = await retailerAdmin.find({ isBlocked: false, isVerified: true }).sort({ averageRating: sortOrder });
+
+        console.log('sorted retailers', sortedRetailers);
+        res.status(200).json({ sortedRetailers, success: true })
+    } catch (error) {
+        console.log('error while sorting', error);
+        res.status(500)
     }
 }
 
@@ -399,78 +507,6 @@ export const addSubscription = async (req: Request, res: Response) => {
 
 }
 
-export const searchRetailer = async (req: Request, res: Response) => {
-
-    const searchVal = req.query.value
-    if (typeof searchVal !== 'string') {
-        return res.status(400).json({
-            success: false,
-            message: "Invalid search value",
-        });
-    }
-
-    try {
-        const searchPattern = new RegExp(searchVal, 'i');
-
-        // Use the $regex operator to find retailers whose name matches the pattern
-        const searchRetailer = await retailerAdmin.find({
-            retailerName: { $regex: searchPattern },
-            isBlocked: false,
-            isVerified: true
-        });
-
-        if (searchRetailer.length > 0) {
-            res.status(200).json({
-                success: true,
-                message: "Retailers found",
-                retailers: searchRetailer
-            });
-        } else {
-            res.status(200).json({
-                success: true,
-                message: "No retailers found matching the search criteria",
-                retailers: []
-            });
-        }
-    } catch (error) {
-        console.log('error while searching data', error)
-        res.status(500)
-    }
-}
-
-export const sortRetailer = async (req: Request, res: Response) => {
-    const value = req.query.value
-    console.log('sort value', value)
-    try {
-        const sortOrder = value === '1' ? 1 : -1;
-        const aggregationPipeline = [
-            {
-                $group: {
-                    _id: '$reviewee.id', // Group by retailer id
-                    averageRating: { $avg: '$rating' } // Calculate average rating
-                }
-            },
-            {
-                $sort: { averageRating: sortOrder } // Sort by average rating
-            }
-        ];
-
-        const retailerRatings = await reviews.aggregate(aggregationPipeline);
-        for (const rating of retailerRatings) {
-            await retailerAdmin.updateOne({ _id: rating._id }, { averageRating: rating.averageRating });
-        }
-
-        const sortedRetailers = await retailerAdmin.find({ isBlocked: false, isVerified: true }).sort({ averageRating: sortOrder });
-
-        console.log('sorted retailers', sortedRetailers);
-        res.status(200).json({ sortedRetailers, success: true })
-    } catch (error) {
-        console.log('error while sorting', error);
-        res.status(500)
-    }
-}
-
-
 export const getReports = async (req: CustomRequest, res: Response) => {
     const id = req.id
     try {
@@ -487,13 +523,13 @@ export const getReports = async (req: CustomRequest, res: Response) => {
         ])
         console.log(orders)
         const populateRetailer = await order.populate(orders, { path: '_id', model: 'RetailerAdmin' })
-        const responseData = populateRetailer.map((ord:any) => ({
+        const responseData = populateRetailer.map((ord: any) => ({
             retailerName: ord._id.retailerName,
             totalOrders: ord.totalOrders
         }))
         console.log('responsse data', responseData)
 
-        res.status(200).json({success:true, pieChart: responseData})
+        res.status(200).json({ success: true, pieChart: responseData })
     } catch (error) {
         console.log('error while fetching reports', error)
         res.status(500)

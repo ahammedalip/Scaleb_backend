@@ -95,6 +95,7 @@ export const otpVerification = async (req: Request, res: Response) => {
 export const retailLogin = async (req: Request, res: Response) => {
     const { retailerName, password, role } = req.body
     console.log(req.body);
+    console.log('coming here');
 
 
     if (role == 'retailAdmin') {
