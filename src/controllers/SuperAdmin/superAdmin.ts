@@ -3,8 +3,8 @@ import { errorhandler } from "../../utils/errorhandler";
 import jwt from 'jsonwebtoken'
 import productionAdmin from "../../models/ProductionAdmin";
 import payment from "../../models/Payments";
-import superAdmin from '../../models/SuperAdmin';
 import retailerAdmin from '../../models/RetailerAdmin';
+import superAdmin from '../../models/SuperAdmin';
 
 interface SuperAdmin {
     username: string;
