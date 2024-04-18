@@ -4,6 +4,7 @@ import { Document, Schema, model } from 'mongoose';
 interface UserInterface extends Document {
   username: string;
   password: string;
+
 }
 
 const userSchema = new Schema<UserInterface>({
@@ -16,6 +17,7 @@ const userSchema = new Schema<UserInterface>({
     type: String,
     required: true,
   },
+  
 });
 
 export const superAdmin = model<UserInterface>('superAdmin', userSchema);
