@@ -94,18 +94,24 @@ export const addSalesExecutive = async (req: Request, res: Response) => {
 
 export const getSalesList = async (req: Request, res: Response) => {
     const id = req.query.id;
-
+    const pageSize: number = 10
     try {
+        const { page = 1 } = req.query as { page?: number }
+
         const validAdmin = await retailerAdmin.findById(id)
         if (!validAdmin) {
             return res.status(403).json({ success: false, message: "Please login" })
         }
+        const countSales = await retailerSales.countDocuments({retailerAdminId:id})
+        const totalPages = Math.ceil(countSales / pageSize)
+
         const salesExeclist = await retailerSales.find({ retailerAdminId: id })
+        .skip((page-1)*pageSize).limit(Number(pageSize))
 
 
 
 
-        res.status(200).json({ success: true, message: 'list fetched successfully', salesExeclist })
+        res.status(200).json({ success: true, message: 'list fetched successfully', salesExeclist, pageSize, totalPages })
 
     } catch (error) {
         console.log('error at sales exec list', error);
@@ -291,14 +297,22 @@ export const sendConnectionRequest = async (req: CustomRequest, res: Response) =
 };
 
 
-export const getOrder = async (req: Request, res: Response) => {
-    const retailerId = req.query.id;
+export const getOrder = async (req: CustomRequest, res: Response) => {
+    const retailerId = req.id
+    const pageSize: number = 6;
     try {
+        const { page = 1 } = req.query as { page?: number }
+
         const countOrder = await order.countDocuments({ retailerId })
+        const totalPages = Math.ceil(countOrder / pageSize);
 
-        const orders = await order.find({ retailerId }).populate('salesExecId').populate('productionId')
+        const orders = await order.find({ retailerId })
+            .skip((page - 1) * pageSize)
+            .limit(Number(pageSize))
+            .populate('salesExecId')
+            .populate('productionId')
 
-        res.status(200).json({ success: true, orders, countOrder });
+        res.status(200).json({ success: true, orders, countOrder, totalPages });
     } catch (error) {
         console.error('Error fetching orders:', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
@@ -308,17 +322,17 @@ export const getOrder = async (req: Request, res: Response) => {
 
 export const addSubscription = async (req: Request, res: Response) => {
     const { planId, id } = req.query
-   
+
     try {
         const fetchplan = await subscriptionPlans.findById(planId)
         const timeDuration = fetchplan?.duration
         const currentDate = new Date();
         let endDate = new Date(currentDate);
         let duration = ''
-        if(timeDuration == '6'){
+        if (timeDuration == '6') {
             duration = 'six'
-        endDate.setDate(currentDate.getDate() + 180); // 180 days from now
-        }else if(timeDuration == '3'){
+            endDate.setDate(currentDate.getDate() + 180); // 180 days from now
+        } else if (timeDuration == '3') {
             duration = 'three'
             endDate.setDate(currentDate.getDate() + 90);
         }
@@ -336,7 +350,7 @@ export const addSubscription = async (req: Request, res: Response) => {
             }, { new: true }
 
         )
-       
+
         const newPayment = new payment({
             userId: id,
             amount: fetchplan?.amount,
@@ -374,19 +388,19 @@ export const getReport = async (req: Request, res: Response) => {
         ]);
         const populatedOrders = await order.populate(orders, { path: '_id', model: 'RetailerSales' });
         const responseData = populatedOrders.map((order: any) => ({
-            retailerName: order._id.username, 
+            retailerName: order._id.username,
             totalOrders: order.totalOrders
         }));
 
 
         const orderToProd = await order.aggregate([
             {
-                $match: { retailerId: new mongoose.Types.ObjectId(userId) } 
+                $match: { retailerId: new mongoose.Types.ObjectId(userId) }
             },
             {
                 $group: {
                     _id: '$productionId',
-                    totalOrders: { $sum: 1 } 
+                    totalOrders: { $sum: 1 }
                 }
             }
         ]);
@@ -397,7 +411,7 @@ export const getReport = async (req: Request, res: Response) => {
             totalOrders: order.totalOrders
         }));
 
-        res.status(200).json({ success: true, message: 'Orders fetched successfully', orders: responseData , ordersToProd: responseDataToProd});
+        res.status(200).json({ success: true, message: 'Orders fetched successfully', orders: responseData, ordersToProd: responseDataToProd });
     } catch (error) {
         console.log('error while fetching reports', error)
         res.status(500)
@@ -405,11 +419,11 @@ export const getReport = async (req: Request, res: Response) => {
 }
 
 
-export const fetchRetailPlans = async(req:Request, res:Response) =>{
+export const fetchRetailPlans = async (req: Request, res: Response) => {
     try {
-        const fetch = await subscriptionPlans.find({role:'retailer', active: true})
+        const fetch = await subscriptionPlans.find({ role: 'retailer', active: true })
         console.log(fetch);
-        res.status(200).json({success:true, fetch})
+        res.status(200).json({ success: true, fetch })
     } catch (error) {
         console.log('error while fetching subscription plans');
         res.status(500)
