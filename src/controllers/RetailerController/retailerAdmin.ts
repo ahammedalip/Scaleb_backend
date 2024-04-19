@@ -92,21 +92,17 @@ export const addSalesExecutive = async (req: Request, res: Response) => {
 }
 
 
-export const getSalesList = async (req: Request, res: Response) => {
-    const id = req.query.id;
+export const getSalesList = async (req: CustomRequest, res: Response) => {
+    const id = req.id;
     const pageSize: number = 10
     try {
         const { page = 1 } = req.query as { page?: number }
 
-        const validAdmin = await retailerAdmin.findById(id)
-        if (!validAdmin) {
-            return res.status(403).json({ success: false, message: "Please login" })
-        }
-        const countSales = await retailerSales.countDocuments({retailerAdminId:id})
+        const countSales = await retailerSales.countDocuments({ retailerAdminId: id })
         const totalPages = Math.ceil(countSales / pageSize)
 
         const salesExeclist = await retailerSales.find({ retailerAdminId: id })
-        .skip((page-1)*pageSize).limit(Number(pageSize))
+            .skip((page - 1) * pageSize).limit(Number(pageSize))
 
 
 
@@ -119,8 +115,8 @@ export const getSalesList = async (req: Request, res: Response) => {
     }
 }
 
-export const blockSalesExec = async (req: Request, res: Response) => {
-
+export const blockSalesExec = async (req: CustomRequest, res: Response) => {
+    const adminId = req.id
     const id = req.query.id
     console.log('id from query is ', id);
 
@@ -141,7 +137,7 @@ export const blockSalesExec = async (req: Request, res: Response) => {
         if (updateStatus) {
             console.log('updated', updateStatus);
         }
-        const salesExeclist = await retailerSales.find()
+        const salesExeclist = await retailerSales.find({ retailerAdminId: adminId })
         return res.status(200).json({ success: true, message: 'User blocked/unblocked successfully', userlist: salesExeclist })
 
     } catch (error) {
