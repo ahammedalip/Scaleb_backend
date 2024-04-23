@@ -68,8 +68,7 @@ export const productionValidation = async (req: Request, res: Response) => {
 }
 
 export const resendOTP = async(req:Request, res:Response)=>{
-    console.log('just coming here')
-    console.log('req.body', req.body.email)
+ 
     try {
         const generatedOTP: number = Math.floor(100000 + Math.random() * 900000)
         const fetchUser = await productionAdmin.findOneAndUpdate(
