@@ -78,7 +78,7 @@ export const fetchRequestedRetailers = async (req: CustomRequest, res: Response)
     try {
         const fetchUser = await productionAdmin.findById(id).populate('requestedRetailer');
 
-        const notBlockedRetailers: any = fetchUser?.requestedRetailer.filter((retailer:any) => !retailer.isBlocked);
+        const notBlockedRetailers: any = fetchUser?.requestedRetailer.filter((retailer: any) => !retailer.isBlocked);
 
         if (notBlockedRetailers.length > 0) {
             // console.log('Some requested retailers are :', notBlockedRetailers);
@@ -97,7 +97,7 @@ export const fetchRequestedRetailers = async (req: CustomRequest, res: Response)
 export const acceptReq = async (req: CustomRequest, res: Response) => {
     const id = req.id;
     const retailId = req.body.id
-
+    console.log('coming here while clicking accept request', retailId);
 
     try {
         const verifyProduction = await productionAdmin.findById(id)
@@ -465,10 +465,10 @@ export const addSubscription = async (req: Request, res: Response) => {
         const currentDate = new Date();
         let endDate = new Date(currentDate);
         let duration = ''
-        if(timeDuration == '6'){
+        if (timeDuration == '6') {
             duration = 'six'
-        endDate.setDate(currentDate.getDate() + 180); // 180 days from now
-        }else if(timeDuration == '3'){
+            endDate.setDate(currentDate.getDate() + 180); // 180 days from now
+        } else if (timeDuration == '3') {
             duration = 'three'
             endDate.setDate(currentDate.getDate() + 90);
         }
@@ -486,7 +486,7 @@ export const addSubscription = async (req: Request, res: Response) => {
             }, { new: true }
 
         )
-        
+
         const newPayment = new payment({
             userId: id,
             amount: fetchplan?.amount,
@@ -532,13 +532,56 @@ export const getReports = async (req: CustomRequest, res: Response) => {
     }
 }
 
-export const fetchPlans = async (req:Request, res:Response) =>{
+export const fetchPlans = async (req: Request, res: Response) => {
     try {
-        const fetch = await subscriptionPlans.find({role:'production', active: true})
+        const fetch = await subscriptionPlans.find({ role: 'production', active: true })
         console.log(fetch);
-        res.status(200).json({success:true, fetch})
+        res.status(200).json({ success: true, fetch })
     } catch (error) {
         console.log('error while fetching subscription plans');
         res.status(500)
+    }
+}
+
+export const acceptEditReq = async (req: Request, res: Response) => {
+    console.log(req.body);
+    try {
+        const updateReq = await order.findByIdAndUpdate(
+            req.body.orderId,
+            { $set: { updateRequest: 'Granted' } },
+            { new: true })
+
+        if (updateReq) {
+            console.log('Order updated successfully:', updateReq);
+        } else {
+            console.log('Order not found', updateReq);
+            return res.status(404).json({success:false })
+        }
+        res.status(200).json({ success: true })
+    } catch (error) {
+        console.log('error while updating edit req', error);
+        res.status(500).json({ success: false, message: 'error while updating edit req' })
+    }
+}
+
+
+export const denyEditRequest = async(req:Request, res:Response)=>{
+    console.log('herere')
+    console.log(req.body.orderId)
+    try {
+        const updateOrder = await order.findByIdAndUpdate(
+            req.body.orderId,
+            {$set: {updateRequest: "Denied"}},
+            {new:true}
+        )
+        if (updateOrder) {
+            console.log('Order updated successfully:', updateOrder);
+        } else {
+            console.log('Order not found', updateOrder);
+            return res.status(404).json({success:false })
+        }
+        res.status(200).json({ success: true })
+    } catch (error) {
+        console.log('Error while rejecting edit request', error)
     }
 }

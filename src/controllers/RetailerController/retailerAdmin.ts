@@ -97,18 +97,11 @@ export const getSalesList = async (req: CustomRequest, res: Response) => {
     const pageSize: number = 10
     try {
         const { page = 1 } = req.query as { page?: number }
-
         const countSales = await retailerSales.countDocuments({ retailerAdminId: id })
         const totalPages = Math.ceil(countSales / pageSize)
-
         const salesExeclist = await retailerSales.find({ retailerAdminId: id })
             .skip((page - 1) * pageSize).limit(Number(pageSize))
-
-
-
-
         res.status(200).json({ success: true, message: 'list fetched successfully', salesExeclist, pageSize, totalPages })
-
     } catch (error) {
         console.log('error at sales exec list', error);
         res.status(500).json({ success: false, message: "Error while fetching data" })
@@ -363,8 +356,9 @@ export const addSubscription = async (req: Request, res: Response) => {
 
 }
 
-export const getReport = async (req: Request, res: Response) => {
-    let userId = req.query.id?.toString();
+export const getReport = async (req: CustomRequest, res: Response) => {
+    // let userId = req.query.id?.toString();
+    const userId = req.id
     try {
         const verifyRetailer = await retailerAdmin.findById(userId)
         if (!verifyRetailer) {
@@ -384,7 +378,7 @@ export const getReport = async (req: Request, res: Response) => {
         ]);
         const populatedOrders = await order.populate(orders, { path: '_id', model: 'RetailerSales' });
         const responseData = populatedOrders.map((order: any) => ({
-            retailerName: order._id.username,
+            retailerName: order._id?.username,
             totalOrders: order.totalOrders
         }));
 
