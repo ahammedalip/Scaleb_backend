@@ -555,7 +555,7 @@ export const acceptEditReq = async (req: Request, res: Response) => {
             console.log('Order updated successfully:', updateReq);
         } else {
             console.log('Order not found', updateReq);
-            return res.status(404).json({success:false })
+            return res.status(404).json({ success: false })
         }
         res.status(200).json({ success: true })
     } catch (error) {
@@ -565,23 +565,39 @@ export const acceptEditReq = async (req: Request, res: Response) => {
 }
 
 
-export const denyEditRequest = async(req:Request, res:Response)=>{
+export const denyEditRequest = async (req: Request, res: Response) => {
     console.log('herere')
     console.log(req.body.orderId)
     try {
         const updateOrder = await order.findByIdAndUpdate(
             req.body.orderId,
-            {$set: {updateRequest: "Denied"}},
-            {new:true}
+            { $set: { updateRequest: "Denied" } },
+            { new: true }
         )
         if (updateOrder) {
             console.log('Order updated successfully:', updateOrder);
         } else {
             console.log('Order not found', updateOrder);
-            return res.status(404).json({success:false })
+            return res.status(404).json({ success: false })
         }
         res.status(200).json({ success: true })
     } catch (error) {
         console.log('Error while rejecting edit request', error)
+        res.status(500)
+    }
+}
+
+export const editDescription = async (req: CustomRequest, res: Response) => {
+    try {
+        const updateDescription = await productionAdmin.findByIdAndUpdate(
+            {_id:req.id},
+            {
+                description: req.body.description
+            }
+        )
+        res.status(200).json({success:true, message: 'description updated successfully'})
+    } catch (error) {
+        console.log('Error while updating subscription', error)
+        res.status(500)
     }
 }
